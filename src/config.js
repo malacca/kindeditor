@@ -3,7 +3,7 @@ function _getBasePath() {
 	var els = document.getElementsByTagName('script'), src;
 	for (var i = 0, len = els.length; i < len; i++) {
 		src = els[i].src || '';
-		if (/kindeditor[\w\-\.]*\.js/.test(src)) {
+		if (src && /kindeditor[\w\-\.]*\.js/.test(src)) {
 			return src.substring(0, src.lastIndexOf('/') + 1);
 		}
 	}
@@ -41,15 +41,64 @@ K.options = {
 	minHeight : 100,
 	minChangeSize : 50,
 	zIndex : 811213,
+	pluginAlias: {
+		insertfile:['image', 'flash', 'media']
+	},
 	items : [
-		'source', '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'code', 'cut', 'copy', 'paste',
-		'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright',
-		'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript',
-		'superscript', 'clearhtml', 'quickformat', 'selectall', '|', 'fullscreen', '/',
-		'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
-		'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'multiimage',
-		'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'baidumap', 'pagebreak',
-		'anchor', 'link', 'unlink', '|', 'about'
+        'undo', 'redo', '|',
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        'formatblock',
+        'fontname',
+        'fontsize',
+        'lineheight',
+        'forecolor',
+        'hilitecolor',
+        'removeformat',
+        'selectall',
+        '|',
+        'cut',
+        'copy',
+        'plainpaste',
+        'wordpaste',
+        'paste',
+        'flash',
+        'media',
+        'insertfile',
+        'pagebreak',
+        'quickformat',
+        '/',
+        'justifyleft',
+        'justifycenter',
+        'justifyright',
+        'justifyfull',
+        'insertorderedlist',
+        'insertunorderedlist',
+        'indent',
+        'outdent',
+        'subscript',
+        'superscript',
+        '|',
+        'emoticons',
+        'link',
+        'unlink',
+        'image',
+        'table',
+        'baidumap',
+        '|',
+        'anchor',
+        'hr',
+        'code',
+        'template',
+        'clearhtml',
+        'preview',
+        'print',
+        'source',
+        'fullscreen',
+        // 'about',
+        // 'multiimage',
 	],
 	noDisableItems : ['source', 'fullscreen'],
 	colorTable : [
@@ -76,10 +125,18 @@ K.options = {
 			'.font-size', '.font-family', '.font-weight', '.font-style', '.text-decoration', '.background',
 			'.width', '.height', '.border-collapse'
 		],
-		'td,th': [
+		'tr,th':[
+			'height', 'align', 'valign', 
+			'.height', '.text-align', '.vertical-align',
+			'.background', '.background-color', 
+			'.border', '.border-style', '.border-color'
+		],
+		td: [
 			'id', 'class', 'align', 'valign', 'width', 'height', 'colspan', 'rowspan', 'bgcolor',
-			'.text-align', '.color', '.background-color', '.font-size', '.font-family', '.font-weight',
-			'.font-style', '.text-decoration', '.vertical-align', '.background', '.border'
+			'.font-style', '.color', '.font-size', '.font-family', '.font-weight', '.text-decoration', 
+			'.width', '.height', '.text-align', '.vertical-align',
+			'.background', '.background-color', 
+			'.border', '.border-width', '.border-style', '.border-color'
 		],
 		a : ['id', 'class', 'href', 'target', 'name'],
 		embed : ['id', 'class', 'src', 'width', 'height', 'type', 'loop', 'autostart', 'quality', '.width', '.height', 'align', 'allowscriptaccess', 'wmode'],
@@ -88,10 +145,10 @@ K.options = {
 			'id', 'class', 'align', '.text-align', '.color', '.background-color', '.font-size', '.font-family', '.background',
 			'.font-weight', '.font-style', '.text-decoration', '.vertical-align', '.text-indent', '.margin-left'
 		],
-		pre : ['id', 'class'],
+		pre : ['id', 'class', 'contenteditable'],
 		hr : ['id', 'class', '.page-break-after'],
-		'br,tbody,tr,strong,b,sub,sup,em,i,u,strike,s,del' : ['id', 'class'],
+		'br,tbody,strong,b,sub,sup,em,i,u,strike,s,del' : ['id', 'class'],
 		iframe : ['id', 'class', 'src', 'frameborder', 'width', 'height', '.width', '.height']
 	},
-	layout : '<div class="container"><div class="toolbar"></div><div class="edit"></div><div class="statusbar"></div></div>'
+	layout : '<div class="container"><div class="ke-toolheader"><div class="toolbar"></div></div><div class="edit"></div><div class="statusbar"></div></div>'
 };

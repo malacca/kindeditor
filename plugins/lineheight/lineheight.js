@@ -34,5 +34,6 @@ KindEditor.plugin('lineheight', function(K) {
 				});
 			});
 		});
+		menu.autoLeft();
 	});
 });

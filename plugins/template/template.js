@@ -8,34 +8,37 @@
 *******************************************************************************/
 
 KindEditor.plugin('template', function(K) {
-	var self = this, name = 'template', lang = self.lang(name + '.'),
+	var self = this, 
+		name = 'template', 
+		lang = self.lang(name + '.'),
 		htmlPath = self.pluginsPath + name + '/html/';
+
 	function getFilePath(fileName) {
 		return htmlPath + fileName + '?ver=' + encodeURIComponent(K.DEBUG ? K.TIME : K.VERSION);
 	}
+	
 	self.clickToolbar(name, function() {
-		var lang = self.lang(name + '.'),
-			arr = ['<div style="padding:10px 20px;">',
-				'<div class="ke-header">',
-				// left start
-				'<div class="ke-left">',
-				lang. selectTemplate + ' <select>'];
-			K.each(lang.fileList, function(key, val) {
-				arr.push('<option value="' + key + '">' + val + '</option>');
-			});
-			html = [arr.join(''),
-				'</select></div>',
-				// right start
-				'<div class="ke-right">',
-				'<input type="checkbox" id="keReplaceFlag" name="replaceFlag" value="1" /> <label for="keReplaceFlag">' + lang.replaceContent + '</label>',
-				'</div>',
-				'<div class="ke-clearfix"></div>',
-				'</div>',
-				'<iframe class="ke-textarea" frameborder="0" style="width:458px;height:260px;background-color:#FFF;"></iframe>',
-				'</div>'].join('');
+		var options = '';
+		K.each(lang.fileList, function(key, val) {
+			options += '<option value="' + key + '">' + val + '</option>';
+		});
+		var html = 
+			`<div style="padding:10px 20px;">
+				<div class="ke-header">
+					<div class="ke-left">
+						${lang. selectTemplate} <select>${options}</select>
+					</div>
+					<div class="ke-right">
+						<input type="checkbox" id="keReplaceFlag" name="replaceFlag" value="1" /> 
+						<label for="keReplaceFlag">${lang.replaceContent}</label>
+					</div>
+					<div class="ke-clearfix"></div>
+				</div>
+				<iframe class="ke-textarea" frameborder="0" style="width:100%;height:340px;background-color:#FFF;"></iframe>
+			</div>`;
 		var dialog = self.createDialog({
 			name : name,
-			width : 500,
+			width : 560,
 			title : self.lang(name),
 			body : html,
 			yesBtn : {

@@ -218,7 +218,7 @@ KindEditor.plugin('multiimage', function(K) {
 		var dialog = self.createDialog({
 			name : name,
 			width : 650,
-			height : 510,
+			height : 540,
 			title : self.lang(name),
 			body : html,
 			previewBtn : {
@@ -749,7 +749,7 @@ SWFUpload.prototype.callFlash = function (functionName, argumentArray) {
 	// Flash's method if calling ExternalInterface methods (code adapted from MooTools).
 	try {
 		returnString = movieElement.CallFunction('<invoke name="' + functionName + '" returntype="javascript">' + __flash__argumentsToXML(argumentArray, 0) + '</invoke>');
-		returnValue = eval(returnString);
+		returnValue = new Function('return '+returnString)();
 	} catch (ex) {
 		throw "Call to " + functionName + " failed";
 	}

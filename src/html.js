@@ -372,7 +372,7 @@ function _mediaEmbed(attrs) {
 	return html;
 }
 
-function _mediaImg(blankPath, attrs) {
+function _mediaImg(attrs) {
 	var width = attrs.width,
 		height = attrs.height,
 		type = attrs.type || _mediaType(attrs.src),
@@ -388,11 +388,9 @@ function _mediaImg(blankPath, attrs) {
 	} else if (height > 0) {
 		style += 'height:' + height + 'px;';
 	}
-	var html = '<img class="' + _mediaClass(type) + '" src="' + blankPath + '" ';
-	if (style !== '') {
-		html += 'style="' + style + '" ';
-	}
-	html += 'data-ke-tag="' + escape(srcTag) + '" alt="" />';
+	var html = '<img class="' + _mediaClass(type) + '" src="'+K.EPNG+'" ' +
+		(style !== '' ? 'style="' + style + '" ' : '') +
+		'data-ke-tag="' + escape(srcTag) + '" />';
 	return html;
 }
 

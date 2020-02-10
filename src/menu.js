@@ -13,11 +13,26 @@ _extend(KMenu, KWidget, {
 			e.stopPropagation();
 		}).attr('unselectable', 'on');
 	},
+	// 新增: menu 尺寸过大, 可能导出弹出层超出可视区域, 可使用该方法重新定位弹出层的 left 值
+	autoLeft: function(x) {
+		var self = this;
+		if (!arguments.length) {
+			x = document.body.clientWidth - self.div.width()
+			if (x >= self.options.x) {
+				return;
+			}
+		}
+		KMenu.parent.pos.call(self, x, null);
+	},
 	addItem : function(item) {
 		var self = this;
 		if (item.title === '-') {
 			self.div.append(K('<div class="ke-menu-separator"></div>'));
 			return;
+		}
+		// 新增一个判断, 在 rmove 时, 没菜单就没必要 unbind 了
+		if (!self._hasMenus) {
+			self._hasMenus = true;
 		}
 		var itemDiv = K('<div class="ke-menu-item" unselectable="on"></div>'),
 			leftDiv = K('<div class="ke-inline-block ke-menu-item-left"></div>'),
@@ -71,7 +86,10 @@ _extend(KMenu, KWidget, {
 		if (self.options.beforeRemove) {
 			self.options.beforeRemove.call(self);
 		}
-		K('.ke-menu-item', self.div[0]).unbind();
+		// 新增
+		if (self._hasMenus) {
+			K('.ke-menu-item', self.div[0]).unbind();
+		}
 		KMenu.parent.remove.call(self);
 		return self;
 	}

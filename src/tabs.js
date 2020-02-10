@@ -5,19 +5,20 @@ function _tabs(options) {
 		afterSelect = options.afterSelect,
 		div = self.div,
 		liList = [];
-	//create tabs
-	div.addClass('ke-tabs')
+	//create tabs  新增: 可自定义 className
+	div.addClass(options.addClass ? options.addClass : 'ke-tabs')
 		.bind('contextmenu,mousedown,mousemove', function(e) {
 			e.preventDefault();
 		});
-	var ul = K('<ul class="ke-tabs-ul ke-clearfix"></ul>');
+	var ul = K('<ul class="ke-clearfix"></ul>');
 	div.append(ul);
 	//add a tab
 	self.add = function(tab) {
-		var li = K('<li class="ke-tabs-li">' + tab.title + '</li>');
+		var li = K('<li>' + tab.title + '</li>');
 		li.data('tab', tab);
 		liList.push(li);
 		ul.append(li);
+		return self;
 	};
 	self.selectedIndex = 0;
 	//select a tab
@@ -26,15 +27,15 @@ function _tabs(options) {
 		_each(liList, function(i, li) {
 			li.unbind();
 			if (i === index) {
-				li.addClass('ke-tabs-li-selected');
+				li.addClass('selected');
 				K(li.data('tab').panel).show('');
 			} else {
-				li.removeClass('ke-tabs-li-selected').removeClass('ke-tabs-li-on')
+				li.removeClass('selected').removeClass('on')
 				.mouseover(function() {
-					K(this).addClass('ke-tabs-li-on');
+					K(this).addClass('on');
 				})
 				.mouseout(function() {
-					K(this).removeClass('ke-tabs-li-on');
+					K(this).removeClass('on');
 				})
 				.click(function() {
 					self.select(i);
@@ -45,6 +46,7 @@ function _tabs(options) {
 		if (afterSelect) {
 			afterSelect.call(self, index);
 		}
+		return self;
 	};
 	//remove tabs
 	self.remove = function() {
@@ -53,6 +55,7 @@ function _tabs(options) {
 		});
 		ul.remove();
 		remove.call(self);
+		return self;
 	};
 	return self;
 }

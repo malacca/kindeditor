@@ -556,9 +556,11 @@ _extend(KNode, {
 	}
 });
 
-_each(('blur,focus,focusin,focusout,load,resize,scroll,unload,click,dblclick,' +
+_each((
+	'blur,focus,focusin,focusout,load,resize,scroll,unload,click,dblclick,' +
 	'mousedown,mouseup,mousemove,mouseover,mouseout,mouseenter,mouseleave,' +
-	'change,select,submit,keydown,keypress,keyup,error,contextmenu').split(','), function(i, type) {
+	'change,select,submit,keydown,keypress,keyup,error,contextmenu'
+).split(','), function(i, type) {
 	KNode.prototype[type] = function(fn) {
 		return fn ? this.bind(type, fn) : this.fire(type);
 	};
@@ -625,4 +627,6 @@ _each(_K, function(key, val) {
 
 K.NodeClass = KNode;
 
-window.KindEditor = K;
+// 改用 rollup 编译, 不再直接导出到 window 对象
+// window.KindEditor = K;
+var KindEditor = K;

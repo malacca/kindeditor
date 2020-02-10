@@ -1,13 +1,4 @@
-
-/**/ var undefined;
-
-if (!window.console) {
-	window.console = {};
-}
-if (!console.log) {
-	console.log = function () {};
-}
-
+var undefined;
 var _VERSION = '${VERSION}',
 	_ua = navigator.userAgent.toLowerCase(),
 	_IE = _ua.indexOf('msie') > -1 && _ua.indexOf('opera') == -1,
@@ -21,7 +12,8 @@ var _VERSION = '${VERSION}',
 	_IERANGE = !window.getSelection,
 	_matches = /(?:msie|firefox|webkit|opera)[\/:\s](\d+)/.exec(_ua),
 	_V = _matches ? _matches[1] : '0',
-	_TIME = new Date().getTime();
+	_TIME = new Date().getTime(),
+	_EPNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 function _isArray(val) {
 	if (!val) {
@@ -166,7 +158,7 @@ function _extend(child, parent, proto) {
 }
 
 //From http://www.json.org/json2.js
-function _json(text) {
+function _json2(text) {
 	var match;
 	if ((match = /\{[\s\S]*\}|\[[\s\S]*\]/.exec(text))) {
 		text = match[0];
@@ -178,13 +170,20 @@ function _json(text) {
 			return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
 		});
 	}
-	if (/^[\],:{}\s]*$/.
-	test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').
-	replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-	replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-		return eval('(' + text + ')');
+	if (!/^[\],:{}\s]*$/.test(text
+		.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@')
+		.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+		.replace(/(?:^|:|,)(?:\s*\[)+/g, '')
+	)) {
+		throw 'JSON parse error';
 	}
-	throw 'JSON parse error';
+	return (new Function('return '+text))();
+}
+function _json(text) {
+	if (typeof JSON === undefined) {
+		return _json2(text);
+	}
+	return JSON.parse(text)
 }
 
 var _round = Math.round;
@@ -198,6 +197,7 @@ var K = {
 	OPERA : _OPERA,
 	V : _V,
 	TIME : _TIME,
+	EPNG: _EPNG,
 	each : _each,
 	isArray : _isArray,
 	isFunction : _isFunction,

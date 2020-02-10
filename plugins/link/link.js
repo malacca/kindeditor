@@ -12,17 +12,17 @@ KindEditor.plugin('link', function(K) {
 	self.plugin.link = {
 		edit : function() {
 			var lang = self.lang(name + '.'),
-				html = '<div style="padding:20px;">' +
-					//url
-					'<div class="ke-dialog-row">' +
-					'<label for="keUrl" style="width:60px;">' + lang.url + '</label>' +
-					'<input class="ke-input-text" type="text" id="keUrl" name="url" value="" style="width:260px;" /></div>' +
-					//type
-					'<div class="ke-dialog-row"">' +
-					'<label for="keType" style="width:60px;">' + lang.linkType + '</label>' +
-					'<select id="keType" name="type"></select>' +
-					'</div>' +
-					'</div>',
+				html = 
+				`<div style="padding:20px;">
+					<div class="ke-dialog-row">
+						<label for="keUrl" style="width:60px;">${lang.url}</label>
+						<input type="text" id="keUrl" name="url" style="width:306px;" />
+					</div>
+					<div class="ke-dialog-row"">
+						<label for="keType" style="width:60px;">${lang.linkType}</label>
+						<select id="keType" name="type"></select>
+					</div>
+				</div>`,
 				dialog = self.createDialog({
 					name : name,
 					width : 450,
@@ -58,7 +58,7 @@ KindEditor.plugin('link', function(K) {
 			urlBox[0].focus();
 			urlBox[0].select();
 		},
-		'delete' : function() {
+		remove: function() {
 			self.exec('unlink', null);
 		}
 	};

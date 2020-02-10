@@ -8,15 +8,15 @@
 *******************************************************************************/
 
 KindEditor.plugin('preview', function(K) {
-	var self = this, name = 'preview', undefined;
+	var self = this, name = 'preview';
 	self.clickToolbar(name, function() {
-		var lang = self.lang(name + '.'),
-			html = '<div style="padding:10px 20px;">' +
-				'<iframe class="ke-textarea" frameborder="0" style="width:708px;height:400px;"></iframe>' +
-				'</div>',
+		var html = 
+			`<div style="border-top:1px solid #dadada;">
+				<iframe class="ke-preview" frameborder="0" style="width:100%;height:500px;"></iframe>
+			</div>`,
 			dialog = self.createDialog({
 				name : name,
-				width : 750,
+				width : 780,
 				title : self.lang(name),
 				body : html
 			}),
@@ -25,7 +25,6 @@ KindEditor.plugin('preview', function(K) {
 		doc.open();
 		doc.write(self.fullHtml());
 		doc.close();
-		K(doc.body).css('background-color', '#FFF');
 		iframe[0].contentWindow.focus();
 	});
 });

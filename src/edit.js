@@ -9,75 +9,100 @@ if ((html = document.getElementsByTagName('html'))) {
 	_direction = html[0].dir;
 }
 
-function _getInitHtml(themesPath, bodyClass, cssPath, cssData) {
-	var arr = [
-		(_direction === '' ? '<html>' : '<html dir="' + _direction + '">'),
-		'<head><meta charset="utf-8" /><title></title>',
-		'<style>',
-		'html {margin:0;padding:0;}',
-		'body {margin:0;padding:5px;}',
-		'body, td {font:12px/1.5 "sans serif",tahoma,verdana,helvetica;}',
-		'body, p, div {word-wrap: break-word;}',
-		'p {margin:5px 0;}',
-		'table {border-collapse:collapse;}',
-		'img {border:0;}',
-		'noscript {display:none;}',
-		'table.ke-zeroborder td {border:1px dotted #AAA;}',
-		'img.ke-flash {',
-		'	border:1px solid #AAA;',
-		'	background-image:url(' + themesPath + 'common/flash.gif);',
-		'	background-position:center center;',
-		'	background-repeat:no-repeat;',
-		'	width:100px;',
-		'	height:100px;',
-		'}',
-		'img.ke-rm {',
-		'	border:1px solid #AAA;',
-		'	background-image:url(' + themesPath + 'common/rm.gif);',
-		'	background-position:center center;',
-		'	background-repeat:no-repeat;',
-		'	width:100px;',
-		'	height:100px;',
-		'}',
-		'img.ke-media {',
-		'	border:1px solid #AAA;',
-		'	background-image:url(' + themesPath + 'common/media.gif);',
-		'	background-position:center center;',
-		'	background-repeat:no-repeat;',
-		'	width:100px;',
-		'	height:100px;',
-		'}',
-		'img.ke-anchor {',
-		'	border:1px dashed #666;',
-		'	width:16px;',
-		'	height:16px;',
-		'}',
-		'.ke-script, .ke-noscript, .ke-display-none {',
-		'	display:none;',
-		'	font-size:0;',
-		'	width:0;',
-		'	height:0;',
-		'}',
-		'.ke-pagebreak {',
-		'	border:1px dotted #AAA;',
-		'	font-size:0;',
-		'	height:2px;',
-		'}',
-		'</style>'
-	];
+function _getDefaultEditorStyle(full) {
+	return `<style>
+		html{margin:0;padding:0;${full ? 'background:#F8F8F8' : ''}}
+		body{background:#fff;margin:0;padding:20px}
+		body.full{margin:15px auto;width:800px;padding:30px;box-shadow:0 0 3px 2px rgba(0, 0, 0, 0.08)}
+		body,td{font:1em/1.5 "sans serif",tahoma,verdana,helvetica;}
+		body, p, div{word-wrap: break-word;}
+		noscript {display:none;}
+		table{border-collapse:collapse;}
+		p{margin-bottom:2em}
+		img::selection{background:rgba(0,0,0,.1)}
+		img{
+			font-size:0;
+			border:0;
+			vertical-align:bottom;
+			max-width:100%;
+			*max-width:99.9%;
+		}
+		img.ke-flash, img.ke-rm, img.ke-media{
+			width:100%;
+			height:460px;
+			background-color:#dedede;
+			background-repeat:no-repeat;
+			background-position:center;
+			background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M447.1 200L295.9 22.1H124.6L275.8 200h171.3zm444.8 0L740.7 22.1H569.4L720.7 200h171.2zm-222.4 0L518.3 22.1H347L498.2 200h171.3zM956.4 22.1H791.8L943.1 200h80.1V88.8c-.1-37.8-29-66.7-66.8-66.7zm-883 0h-6.7C29 22.1 0 51 0 88.8V200h224.6L73.4 22.1zM0 934c0 37.8 28.9 66.7 66.7 66.7h889.7c37.8 0 66.7-28.9 66.7-66.7V244.5H0V934zm355.9-489.3c0-37.8 31.1-55.6 66.7-55.6 11.1 0 24.5 2.2 35.6 8.9l253.5 146.8a63 63 0 0 1 0 111.2L458.2 802.8c-11.1 6.7-22.2 8.9-35.6 8.9-35.6 0-66.7-17.8-66.7-55.6V444.7zm0 0' fill='%23999999'/%3E%3C/svg%3E");
+			*width:99.9%;
+		}
+		img.ke-flash{
+			background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 0v1024h1024V0H0zm766.427 327.534c-118.528-3.95-163.584 126.135-163.584 126.135H708.28v111.579s-64.146-.073-151.479 0c-93.038 233.216-250.66 234.46-292.864 233.143-.658-.037-8.667-.073-8.667-.073s.073-95.671-.074-111.8c62.062-.145 128.074-8.008 199.351-198.911 102.071-305.298 311.808-271.653 311.808-271.653v111.58z' fill='%23999999'/%3E%3C/svg%3E")
+		}
+		img.ke-anchor {
+			width:18px;
+			height:18px;
+			margin:0 3px;
+			vertical-align:text-bottom;
+			background:#70B4F1 url(\"data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath d='M565.862 893.594a367.77 367.77 0 0 0 313.856-363.828 51.2 51.2 0 1 1 102.4 0 470.118 470.118 0 1 1-940.236 0 51.2 51.2 0 0 1 102.4 0 367.82 367.82 0 0 0 312.064 363.52V411.802A200.858 200.858 0 0 1 511.13 17.766a200.806 200.806 0 0 1 54.732 394.036v481.792zM511.078 309.76a91.29 91.29 0 1 0 0-182.528 91.29 91.29 0 0 0 0 182.528z' fill='%23ffffff'/%3E%3C/svg%3E\") no-repeat center;
+			*background:#70B4F1
+		}
+		.ke-script, .ke-noscript, .ke-display-none{
+			display:none
+		}
+		.ke-pagebreak {
+			border:1px dotted #AAA;
+			font-size:0;
+			height:2px;
+		}
+		pre.prettyprint{
+			padding: 10px;
+			background: #F5F2F0;
+			overflow: auto;
+			user-select: none;
+			color: #9c5425;
+			font-family: Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;
+		}
+		pre.prettyprint::selection{
+			box-shadow: 0 0 1px 1px #7db7ff;
+		}
+		body.preview embed{
+			width:100%;
+			height:460px;
+		}
+	</style>`
+}
+
+function _getInitHtml(cssEmpty, bodyClass, cssPath, cssData, isFull) {
+	bodyClass = bodyClass ? [bodyClass] : [];
+	if (isFull) {
+		bodyClass.push('full');
+	}
+	var dir = _direction === '' ? '' : ' dir="' + _direction + '"',
+		styleBody = bodyClass.length ? ' class="' + bodyClass.join(' ') + '"' : '',
+		styleHeader = [];
+	if (!cssEmpty) {
+		styleHeader.push(_getDefaultEditorStyle(isFull))
+	}
 	if (!_isArray(cssPath)) {
 		cssPath = [cssPath];
 	}
 	_each(cssPath, function(i, path) {
 		if (path) {
-			arr.push('<link href="' + path + '" rel="stylesheet" />');
+			styleHeader.push('<link href="' + path + '" rel="stylesheet" />');
 		}
 	});
 	if (cssData) {
-		arr.push('<style>' + cssData + '</style>');
+		styleHeader.push('<style>' + cssData + '</style>');
 	}
-	arr.push('</head><body ' + (bodyClass ? 'class="' + bodyClass + '"' : '') + '></body></html>');
-	return arr.join('\n');
+	styleHeader = styleHeader.join('');
+	return `<html${dir}>
+		<head>
+			<meta charset="utf-8" /><title></title>
+			${styleHeader}
+		</head>
+		<body${styleBody}></body>
+	</html>`;
 }
 
 function _elementVal(knode, val) {
@@ -110,8 +135,7 @@ _extend(KEdit, KWidget, {
 		self.beforeSetHtml = options.beforeSetHtml;
 		self.afterSetHtml = options.afterSetHtml;
 
-		var themesPath = _undef(options.themesPath, ''),
-			bodyClass = options.bodyClass,
+		var bodyClass = options.bodyClass,
 			cssPath = options.cssPath,
 			cssData = options.cssData,
 			isDocumentDomain = location.protocol != 'res:' && location.host.replace(/:\d+/, '') !== document.domain,
@@ -142,7 +166,7 @@ _extend(KEdit, KWidget, {
 			if (isDocumentDomain) {
 				doc.domain = document.domain;
 			}
-			doc.write(_getInitHtml(themesPath, bodyClass, cssPath, cssData));
+			doc.write(_getInitHtml(self.options.cssEmpty, bodyClass, cssPath, cssData, self.options.isFull));
 			doc.close();
 			self.win = self.iframe[0].contentWindow;
 			self.doc = doc;
@@ -160,8 +184,7 @@ _extend(KEdit, KWidget, {
 						cmd.select();
 					}
 				});
-			}
-			if (_IE) {
+			} else if (_IE) {
 				// Fix bug: https://github.com/kindsoft/kindeditor/issues/53
 				self._mousedownHandler = function() {
 					var newRange = cmd.range.cloneRange();
@@ -256,14 +279,13 @@ _extend(KEdit, KWidget, {
 			var body = doc.body;
 			// get
 			if (val === undefined) {
-				if (isFull) {
-					val = '<!doctype html><html>' + body.parentNode.innerHTML + '</html>';
-				} else {
-					val = body.innerHTML;
-				}
-				if (self.beforeGetHtml) {
-					val = self.beforeGetHtml(val);
-				}
+				val = body.innerHTML;
+                if (self.beforeGetHtml) {
+                    val = self.beforeGetHtml(val);
+                }
+                if (isFull) {
+                    val = '<!doctype html><html><head>'+doc.getElementsByTagName('head')[0].innerHTML+'</head><body class="'+self.options.bodyClass+' preview">' + val + '</body></html>';
+                }
 				// bugfix: Firefox自动生成一个br标签
 				if (_GECKO && val == '<br />') {
 					val = '';

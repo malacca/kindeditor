@@ -14,9 +14,9 @@ KindEditor.plugin('map', function(K) {
 	self.clickToolbar(name, function() {
 		var html = ['<div style="padding:10px 20px;">',
 			'<div class="ke-dialog-row">',
-			lang.address + ' <input id="kindeditor_plugin_map_address" name="address" class="ke-input-text" value="" style="width:200px;" /> ',
-			'<span class="ke-button-common ke-button-outer">',
-			'<input type="button" name="searchBtn" class="ke-button-common ke-button" value="' + lang.search + '" />',
+			lang.address + ' <input type="text" id="kindeditor_plugin_map_address" name="address" value="" style="width:200px;" /> ',
+			'<span class="ke-button-outer">',
+			'<input type="button" name="searchBtn" class="ke-button" value="' + lang.search + '" />',
 			'</span>',
 			'</div>',
 			'<div class="ke-map" style="width:558px;height:360px;"></div>',

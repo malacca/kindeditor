@@ -11,13 +11,14 @@ KindEditor.plugin('wordpaste', function(K) {
 	var self = this, name = 'wordpaste';
 	self.clickToolbar(name, function() {
 		var lang = self.lang(name + '.'),
-			html = '<div style="padding:10px 20px;">' +
-				'<div style="margin-bottom:10px;">' + lang.comment + '</div>' +
-				'<iframe class="ke-textarea" frameborder="0" style="width:408px;height:260px;"></iframe>' +
-				'</div>',
+			html = 
+			`<div style="padding:10px 20px;">
+				<div style="margin-bottom:10px;">${lang.comment}</div>
+				<iframe class="ke-textarea" frameborder="0" style="width:100%;height:340px;"></iframe>
+			</div>`,
 			dialog = self.createDialog({
 				name : name,
-				width : 450,
+				width : 560,
 				title : self.lang(name),
 				body : html,
 				yesBtn : {

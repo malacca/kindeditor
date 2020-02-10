@@ -11,13 +11,14 @@ KindEditor.plugin('plainpaste', function(K) {
 	var self = this, name = 'plainpaste';
 	self.clickToolbar(name, function() {
 		var lang = self.lang(name + '.'),
-			html = '<div style="padding:10px 20px;">' +
-				'<div style="margin-bottom:10px;">' + lang.comment + '</div>' +
-				'<textarea class="ke-textarea" style="width:408px;height:260px;"></textarea>' +
-				'</div>',
+			html = 
+			`<div style="padding:10px 20px;">
+				<div style="margin-bottom:10px;">${lang.comment}</div>
+				<textarea class="ke-textarea" style="width:100%;height:340px;"></textarea>
+			</div>`,
 			dialog = self.createDialog({
 				name : name,
-				width : 450,
+				width : 560,
 				title : self.lang(name),
 				body : html,
 				yesBtn : {

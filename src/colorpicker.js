@@ -35,6 +35,10 @@ _extend(KColorPicker, KWidget, {
 				self._addAttr(cell, colors[i][j], 'ke-colorpicker-cell');
 			}
 		}
+		var x = document.body.clientWidth - self.div.width()
+		if (x < self.options.x) {
+			KMenu.parent.pos.call(self, x, null);
+		}
 	},
 	_addAttr : function(cell, color, cls) {
 		var self = this;

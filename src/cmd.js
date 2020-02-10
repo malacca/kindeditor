@@ -236,10 +236,15 @@ _extend(KCmd, {
 	},
 	select : function(hasDummy) {
 		hasDummy = _undef(hasDummy, true);
-		var self = this, sel = self.sel, range = self.range.cloneRange().shrink(),
-			sc = range.startContainer, so = range.startOffset,
-			ec = range.endContainer, eo = range.endOffset,
-			doc = _getDoc(sc), win = self.win, rng, hasU200b = false;
+		var self = this, 
+			sel = self.sel, 
+			range = self.range.cloneRange().shrink(),
+			sc = range.startContainer, 
+			so = range.startOffset,
+			ec = range.endContainer, 
+			eo = range.endOffset,
+			doc = _getDoc(sc), 
+			win = self.win, rng, hasU200b = false;
 		// tag内部无内容时选中tag内部，<tagName>[]</tagName>
 		if (hasDummy && sc.nodeType == 1 && range.collapsed) {
 			if (_IERANGE) {
@@ -278,8 +283,18 @@ _extend(KCmd, {
 			sel.addRange(rng);
 			// Bugfix: https://github.com/kindsoft/kindeditor/issues/54
 			if (doc !== document) {
-				var pos = K(rng.endContainer).pos();
-				win.scrollTo(pos.x, pos.y);
+                var selElm = K(rng.endContainer),
+                    pos = selElm.pos(),
+					selH = selElm.height() + 10, //留白 10px
+					scrollH = win.scrollY||win.pageYOffset,
+                    hideH = pos.y + selH - scrollH - win.innerHeight;
+                // selElm 的最底部仍在 可视区域内 就不做处理    
+                if (hideH <= 0) {
+                    return;
+                }
+                // 否则仅滚动到可视即可, 无需将选中区域滚动到最顶部
+                var toY = selH > win.innerHeight ? pos.y - 10 : scrollH + hideH;
+                win.scrollTo(pos.x, toY);
 			}
 		}
 		win.focus();
@@ -840,18 +855,20 @@ _extend(KCmd, {
 	}
 });
 
-_each(('formatblock,selectall,justifyleft,justifycenter,justifyright,justifyfull,insertorderedlist,' +
-	'insertunorderedlist,indent,outdent,subscript,superscript').split(','), function(i, name) {
+var _IEJUSTIFY_TAG = 'justifyleft,justifycenter,justifyright,justifyfull'.split(','),
+	_IELIST_TAG = 'formatblock,selectall,insertorderedlist,insertunorderedlist'.split(','),
+	_IERANGE_TAG = _IEJUSTIFY_TAG.concat(_IELIST_TAG).concat('indent,outdent,subscript,superscript'.split(','));
+_each(_IERANGE_TAG, function(i, name) {
 	KCmd.prototype[name] = function(val) {
 		var self = this;
 		self.select();
 		_nativeCommand(self.doc, name, val);
 		// Bugfix: [IE] 先选中图片后居中，再左对齐，光标跳到顶部
-		if (_IERANGE && _inArray(name, 'justifyleft,justifycenter,justifyright,justifyfull'.split(',')) >= 0) {
+		if (_IERANGE && _inArray(name, _IEJUSTIFY_TAG) >= 0) {
 			self.selection();
 		}
 		// 在webkit和firefox上需要重新选取range，否则有时候会报错
-		if (!_IERANGE || _inArray(name, 'formatblock,selectall,insertorderedlist,insertunorderedlist'.split(',')) >= 0) {
+		if (!_IERANGE || _inArray(name, _IELIST_TAG) >= 0) {
 			self.selection();
 		}
 		return self;

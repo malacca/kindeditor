@@ -2,8 +2,8 @@
 function _createButton(arg) {
 	arg = arg || {};
 	var name = arg.name || '',
-		span = K('<span class="ke-button-common ke-button-outer" title="' + name + '"></span>'),
-		btn = K('<input class="ke-button-common ke-button" type="button" value="' + name + '" />');
+		span = K('<span class="ke-button-outer" title="' + name + '"></span>'),
+		btn = K('<input class="ke-button" type="button" value="' + name + '" />');
 	if (arg.click) {
 		btn.click(arg.click);
 	}
@@ -70,8 +70,8 @@ _extend(KDialog, KWidget, {
 		if (self.height) {
 			bodyDiv.height(_removeUnit(self.height) - headerDiv.height() - footerDiv.height());
 		}
-		self.div.width(self.div.width());
-		self.div.height(self.div.height());
+		var divW = self.div.width(), divH = self.div.height();
+		self.div.width(divW).height(divH);
 		self.mask = null;
 		if (showMask) {
 			var docEl = _docElement(self.doc),
@@ -86,7 +86,7 @@ _extend(KDialog, KWidget, {
 				height : docHeight
 			});
 		}
-		self.autoPos(self.div.width(), self.div.height());
+		self.autoPos(divW, divH);
 		self.footerDiv = footerDiv;
 		self.bodyDiv = bodyDiv;
 		self.headerDiv = headerDiv;
@@ -98,10 +98,22 @@ _extend(KDialog, KWidget, {
 	},
 	showLoading : function(msg) {
 		msg = _undef(msg, '');
-		var self = this, body = self.bodyDiv;
-		self.loading = K('<div class="ke-dialog-loading"><div class="ke-inline-block ke-dialog-loading-content" style="margin-top:' + Math.round(body.height() / 3) + 'px;">' + msg + '</div></div>')
+		var self = this, 
+			body = self.bodyDiv,
+			svgLoad = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:block;margin:auto;width:90px;height:90px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">',
+            headHeight = self.headerDiv.height(),
+            loadTop = headHeight + 55;
+        for (var i=0; i<9; i++) {
+            svgLoad += `<g transform="rotate(${45 * i} 50 50)">
+            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#bbbbbb">
+              <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="${-0.125 * (8 - i)}s" repeatCount="indefinite"></animate>
+            </rect>
+          </g>`
+        }
+        svgLoad += '</svg>';
+		self.loading = K('<div class="ke-dialog-loading"><div class="ke-inline-block ke-dialog-loading-content" style="margin-top:' + Math.round(body.height() / 2 - loadTop) + 'px;">' + svgLoad + msg + '</div></div>')
 			.width(body.width()).height(body.height())
-			.css('top', self.headerDiv.height() + 'px');
+			.css('top', headHeight + 'px');
 		body.css('visibility', 'hidden').after(self.loading);
 		self.isLoading = true;
 		return self;

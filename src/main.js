@@ -95,7 +95,7 @@ function _bindContextmenuEvent() {
 				items.push(this);
 				return;
 			}
-			if (this.cond && this.cond()) {
+			if (this.cond && this.cond(e)) {
 				items.push(this);
 				if (this.width && this.width > maxWidth) {
 					maxWidth = this.width;
@@ -302,6 +302,26 @@ function _undoToRedo(fromStack, toStack) {
 	return self;
 }
 
+// 可能是 require 引用的 kindeditor, 此时 window 中没有 KindEditor 对象
+// 但所加载 js (plugin/lang) 需要这个全局对象
+function _loadEditorScript(src, fn) {
+	var temp = false;
+	if (!window.KindEditor) {
+		window.KindEditor = KindEditor;
+		temp = true;
+	}
+	_loadScript(src, function() {
+		fn && fn();
+		if (temp) {
+			try {
+				delete window.KindEditor;
+			} catch(e) {
+				window.KindEditor === undefined;
+			}
+		}
+	});
+}
+
 function KEditor(options) {
 	var self = this;
 	// save original options
@@ -381,9 +401,17 @@ KEditor.prototype = {
 			}
 			return self;
 		}
-		// 还没加载相关plugin，动态加载
+		// 还没加载相关plugin，动态加载, 新增 pluginAlias 参数
+		var alias = self.pluginAlias||{},
+			pathName = name;
+		for (let k in alias) {
+			if (K.inArray(name, alias[k]||[]) >= 0) {
+				pathName = k;
+				break;
+			}
+		}
 		_plugins[name] = 'loading';
-		_loadScript(self.pluginsPath + name + '/' + name + '.js?ver=' + encodeURIComponent(K.DEBUG ? _TIME : _VERSION), function() {
+		_loadEditorScript(self.pluginsPath + pathName + '/' + pathName + '.js?ver=' + encodeURIComponent(K.DEBUG ? _TIME : _VERSION), function() {
 			// Fix bug: https://github.com/kindsoft/kindeditor/issues/105
 			setTimeout(function() {
 				if (_plugins[name]) {
@@ -452,7 +480,6 @@ KEditor.prototype = {
 		if (self.isCreated) {
 			return self;
 		}
-
 		if (self.srcElement.data('kindeditor')) {
 			return self;
 		}
@@ -478,8 +505,9 @@ KEditor.prototype = {
 		var toolbarDiv = K('.toolbar', container),
 			editDiv = K('.edit', container),
 			statusbar = self.statusbar = K('.statusbar', container);
-		container.removeClass('container')
-			.addClass('ke-container ke-container-' + self.themeType).css('width', width);
+		container.removeClass('container').addClass(
+			'ke-container ke-container-' + self.themeType + (fullscreenMode ? ' ke-container-full' : '')
+		).css('width', width);
 		if (fullscreenMode) {
 			container.css({
 				position : 'absolute',
@@ -514,13 +542,13 @@ KEditor.prototype = {
 		// create toolbar
 		var htmlList = [];
 		K.each(self.items, function(i, name) {
-			if (name == '|') {
+			if (name == '|' || (fullscreenMode && name == '/')) {
 				htmlList.push('<span class="ke-inline-block ke-separator"></span>');
-			} else if (name == '/') {
+			} else if (!fullscreenMode && name == '/') {
 				htmlList.push('<div class="ke-hr"></div>');
 			} else {
 				htmlList.push('<span class="ke-outline" data-name="' + name + '" title="' + self.lang(name) + '" unselectable="on">');
-				htmlList.push('<span class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-' + name + '" unselectable="on"></span></span>');
+				htmlList.push('<span class="ke-toolbar-icon ke-icon-' + name + '" unselectable="on"></span></span>');
 			}
 		});
 		var toolbar = self.toolbar = _toolbar({
@@ -546,10 +574,11 @@ KEditor.prototype = {
 			src : editDiv,
 			srcElement : self.srcElement,
 			designMode : self.designMode,
-			themesPath : self.themesPath,
 			bodyClass : self.bodyClass,
+			cssEmpty : self.cssEmpty,
 			cssPath : self.cssPath,
 			cssData : self.cssData,
+            isFull: self.fullscreenMode,
 			beforeGetHtml : function(html) {
 				html = self.beforeGetHtml(html);
 				// Bugfix: 浏览器后退产生__kindeditor_bookmark_start_0__
@@ -619,26 +648,17 @@ KEditor.prototype = {
 				}
 			}
 		});
+
 		// create statusbar
 		statusbar.removeClass('statusbar').addClass('ke-statusbar')
 			.append('<span class="ke-inline-block ke-statusbar-center-icon"></span>')
 			.append('<span class="ke-inline-block ke-statusbar-right-icon"></span>');
-
+			
 		// remove resize event
 		if (self._fullscreenResizeHandler) {
 			K(window).unbind('resize', self._fullscreenResizeHandler);
 			self._fullscreenResizeHandler = null;
 		}
-		// reset size
-		function initResize() {
-			// Bugfix: 页面刷新后，与第一次访问加载的编译器高度不一致
-			if (statusbar.height() === 0) {
-				setTimeout(initResize, 100);
-				return;
-			}
-			self.resize(width, height, false);
-		}
-		initResize();
 		// fullscreen mode
 		if (fullscreenMode) {
 			self._fullscreenResizeHandler = function(e) {
@@ -648,8 +668,13 @@ KEditor.prototype = {
 			};
 			K(window).bind('resize', self._fullscreenResizeHandler);
 			toolbar.select('fullscreen');
-			statusbar.first().css('visibility', 'hidden');
-			statusbar.last().css('visibility', 'hidden');
+			if (self.fullscreenStatusBar) {
+				statusbar.first().css('visibility', 'hidden');
+				statusbar.last().css('visibility', 'hidden');
+			} else {
+				statusbar.hide();
+				setTimeout(self._fullscreenResizeHandler, 100)
+			}
 		} else {
 			if (_GECKO) {
 				K(window).bind('scroll', function(e) {
@@ -682,6 +707,9 @@ KEditor.prototype = {
 			} else {
 				statusbar.last().css('visibility', 'hidden');
 			}
+			setTimeout(function() {
+				self.resize(width, height, false);
+			}, 100)
 		}
 		return self;
 	},
@@ -900,7 +928,8 @@ KEditor.prototype = {
 			options.noColor = self.lang('noColor');
 			self.menu = _colorpicker(options);
 		} else {
-			options.cls = 'ke-menu-' + self.themeType;
+			// 新增: 可额外增加 class
+			options.cls = 'ke-menu-' + self.themeType + (options.addClass ? ' ' + options.addClass : '');
 			options.centerLineMode = false;
 			self.menu = _menu(options);
 		}
@@ -922,24 +951,19 @@ KEditor.prototype = {
 		options.shadowMode = _undef(options.shadowMode, self.shadowMode);
 		options.closeBtn = _undef(options.closeBtn, {
 			name : self.lang('close'),
-			click : function(e) {
-				self.hideDialog();
-				// IE bugfix: 关闭dialog后，跳转到top
-				if (_IE && self.cmd) {
-					self.cmd.select();
-				}
+			click : function() {
+				self.closeDialog()
 			}
 		});
-		options.noBtn = _undef(options.noBtn, {
-			name : self.lang(options.yesBtn ? 'no' : 'close'),
-			click : function(e) {
-				self.hideDialog();
-				// IE bugfix: 关闭dialog后，跳转到top
-				if (_IE && self.cmd) {
-					self.cmd.select();
+		// 默认不显示 noBtn, 可按照 btn 格式设置或指定为 true 来显示默认 noBtn
+		if (options.noBtn === true) {
+			options.noBtn = {
+				name : self.lang(options.yesBtn ? 'no' : 'close'),
+				click : function() {
+					self.closeDialog()
 				}
-			}
-		});
+			};
+		}
 		if (self.dialogAlignType != 'page') {
 			options.alignEl = self.container;
 		}
@@ -959,6 +983,13 @@ KEditor.prototype = {
 		self.dialogs.push(dialog);
 		return dialog;
 	},
+	closeDialog: function() {
+		this.hideDialog();
+		// IE bugfix: 关闭dialog后，跳转到top
+		if (_IE && this.cmd) {
+			this.cmd.select();
+		}
+	},
 	hideDialog : function() {
 		var self = this;
 		if (self.dialogs.length > 0) {
@@ -975,9 +1006,9 @@ KEditor.prototype = {
 	errorDialog : function(html) {
 		var self = this;
 		var dialog = self.createDialog({
-			width : 750,
+			width : 680,
 			title : self.lang('uploadError'),
-			body : '<div style="padding:10px 20px;"><iframe frameborder="0" style="width:708px;height:400px;"></iframe></div>'
+			body : '<div style="padding-left:16px"><iframe frameborder="0" style="width:100%;height:400px;"></iframe></div>'
 		});
 		var iframe = K('iframe', dialog.div), doc = K.iframeDoc(iframe);
 		doc.open();
@@ -1010,7 +1041,8 @@ function _create(expr, options) {
 	// 自动加载CSS文件
 	if (_undef(options.loadStyleMode, K.options.loadStyleMode)) {
 		var themeType = _undef(options.themeType, K.options.themeType);
-		_loadStyle(options.themesPath + 'default/default.css');
+		// 不加载默认 css 了, 完全自定义
+		//_loadStyle(options.themesPath + 'default/default.css'); 
 		_loadStyle(options.themesPath + themeType + '/' + themeType + '.css');
 	}
 	function create(editor) {
@@ -1043,7 +1075,7 @@ function _create(expr, options) {
 		return create(editor);
 	}
 	// create editor after load lang file
-	_loadScript(editor.langPath + editor.langType + '.js?ver=' + encodeURIComponent(K.DEBUG ? _TIME : _VERSION), function() {
+	_loadEditorScript(editor.langPath + editor.langType + '.js?ver=' + encodeURIComponent(K.DEBUG ? _TIME : _VERSION), function() {
 		create(editor);
 	});
 	return editor;
@@ -1241,6 +1273,7 @@ _plugin('core', function(K) {
 				}
 			});
 		});
+		menu.autoLeft();
 	});
 	// fontname
 	self.clickToolbar('fontname', function() {
@@ -1258,6 +1291,7 @@ _plugin('core', function(K) {
 				}
 			});
 		});
+		menu.autoLeft();
 	});
 	// fontsize
 	self.clickToolbar('fontsize', function() {
@@ -1276,6 +1310,7 @@ _plugin('core', function(K) {
 				}
 			});
 		});
+		menu.autoLeft();
 	});
 	// forecolor,hilitecolor
 	_each('forecolor,hilitecolor'.split(','), function(i, name) {
@@ -1338,9 +1373,9 @@ _plugin('core', function(K) {
 			return img[0].className == 'ke-anchor';
 		});
 	};
-	_each('link,image,flash,media,anchor'.split(','), function(i, name) {
+	_each('anchor,link,image,flash,media'.split(','), function(i, name) {
 		var uName = name.charAt(0).toUpperCase() + name.substr(1);
-		_each('edit,delete'.split(','), function(j, val) {
+		_each('edit,remove'.split(','), function(j, val) {
 			self.addContextmenu({
 				title : self.lang(val + uName),
 				click : function() {
@@ -1366,9 +1401,11 @@ _plugin('core', function(K) {
 	self.plugin.getSelectedCell = function() {
 		return self.cmd.commonAncestor('td');
 	};
-	_each(('prop,cellprop,colinsertleft,colinsertright,rowinsertabove,rowinsertbelow,rowmerge,colmerge,' +
-	'rowsplit,colsplit,coldelete,rowdelete,insert,delete').split(','), function(i, val) {
-		var cond = _inArray(val, ['prop', 'delete']) < 0 ? self.plugin.getSelectedCell : self.plugin.getSelectedTable;
+	_each((
+		'prop,rowprop,cellprop,colinsertleft,colinsertright,rowinsertabove,rowinsertbelow,rowmerge,colmerge,' +
+		'rowsplit,colsplit,coldelete,rowdelete,insert,remove'
+	).split(','), function(i, val) {
+		var cond = _inArray(val, ['prop', 'remove']) < 0 ? self.plugin.getSelectedCell : self.plugin.getSelectedTable;
 		self.addContextmenu({
 			title : self.lang('table' + val),
 			click : function() {
@@ -1384,9 +1421,11 @@ _plugin('core', function(K) {
 	});
 	self.addContextmenu({ title : '-' });
 	// other
-	_each(('selectall,justifyleft,justifycenter,justifyright,justifyfull,insertorderedlist,' +
+	_each((
+		'selectall,justifyleft,justifycenter,justifyright,justifyfull,insertorderedlist,' +
 		'insertunorderedlist,indent,outdent,subscript,superscript,hr,print,' +
-		'bold,italic,underline,strikethrough,removeformat,unlink').split(','), function(i, name) {
+		'bold,italic,underline,strikethrough,removeformat,unlink'
+	).split(','), function(i, name) {
 		if (shortcutKeys[name]) {
 			self.afterCreate(function() {
 				_ctrl(this.edit.doc, shortcutKeys[name], function() {
@@ -1573,14 +1612,14 @@ _plugin('core', function(K) {
 			attrs.src = _undef(attrs.src, '');
 			attrs.width = _undef(attrs.width, 0);
 			attrs.height = _undef(attrs.height, 0);
-			return _mediaImg(self.themesPath + 'common/blank.gif', attrs);
+			return _mediaImg(attrs);
 		})
 		.replace(/<a[^>]*name="([^"]+)"[^>]*>(?:<\/a>)?/ig, function(full) {
 			var attrs = _getAttrList(full);
 			if (attrs.href !== undefined) {
 				return full;
 			}
-			return '<img class="ke-anchor" src="' + self.themesPath + 'common/anchor.gif" data-ke-name="' + escape(attrs.name) + '" />';
+			return '<img class="ke-anchor" src="'+K.EPNG+'" data-ke-name="' + escape(attrs.name) + '" />';
 		})
 		.replace(/<script([^>]*)>([\s\S]*?)<\/script>/ig, function(full, attr, code) {
 			return '<div class="ke-script" data-ke-script-attr="' + escape(attr) + '">' + escape(code) + '</div>';

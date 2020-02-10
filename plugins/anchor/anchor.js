@@ -11,12 +11,13 @@ KindEditor.plugin('anchor', function(K) {
 	var self = this, name = 'anchor', lang = self.lang(name + '.');
 	self.plugin.anchor = {
 		edit : function() {
-			var html = ['<div style="padding:20px;">',
-					'<div class="ke-dialog-row">',
-					'<label for="keName">' + lang.name + '</label>',
-					'<input class="ke-input-text" type="text" id="keName" name="name" value="" style="width:100px;" />',
-					'</div>',
-					'</div>'].join('');
+			var html = 
+			`<div style="padding:20px;">
+				<div class="ke-dialog-row">
+					<label for="keName">${lang.name}</label>
+					<input type="text" id="keName" name="name" value="" style="width:170px;" />
+				</div>
+			</div>`;
 			var dialog = self.createDialog({
 				name : name,
 				width : 300,
@@ -38,7 +39,7 @@ KindEditor.plugin('anchor', function(K) {
 			nameBox[0].focus();
 			nameBox[0].select();
 		},
-		'delete' : function() {
+		remove: function() {
 			self.plugin.getSelectedAnchor().remove();
 		}
 	};

@@ -9,6 +9,7 @@
 
 KindEditor.plugin('table', function(K) {
 	var self = this, name = 'table', lang = self.lang(name + '.'), zeroborder = 'ke-zeroborder';
+
 	// 设置颜色
 	function _setColor(box, color) {
 		color = color.toUpperCase();
@@ -16,6 +17,7 @@ KindEditor.plugin('table', function(K) {
 		box.css('color', color === '#000000' ? '#FFFFFF' : '#000000');
 		box.html(color);
 	}
+
 	// 初始化取色器
 	var pickerList = [];
 	function _initColorPicker(dialogDiv, colorBox) {
@@ -52,6 +54,7 @@ KindEditor.plugin('table', function(K) {
 			dialogDiv.bind('click,mousedown', removePicker);
 		});
 	}
+
 	// 取得下一行cell的index
 	function _getCellIndex(table, row, cell) {
 		var rowSpanCount = 0;
@@ -63,64 +66,123 @@ KindEditor.plugin('table', function(K) {
 		}
 		return cell.cellIndex - rowSpanCount;
 	}
+
 	self.plugin.table = {
+		// 新增一个 快速添加 table 功能
+		quick: function(){
+			var menu, html, i, table, selected, status, nums, more, row, col,
+				wrapperDiv = K('<div class="ke-plugin-qtable"></div>');
+			html = '<div class="ke-plugin-qtable-table"><ul>';
+			for (i=0; i<100; i++) {
+				html += '<li index="'+i+'"></li>';
+			}
+			html += '</ul><div class="ke-plugin-qtable-selected"></div></div><div class="ke-plugin-qtable-status"><b>0 X 0</b><button>'+lang.advanced+'</button></div>';
+			wrapperDiv.html(html);
+			table = wrapperDiv.first();
+			selected = table.last();
+			status = wrapperDiv.last();
+			nums = status.first();
+			more = status.last();
+			table.bind('mousemove', function(ev) {
+				if (ev.target.tagName.toLowerCase() === 'li') {
+					var index = ev.target.getAttribute('index') * 1,
+						newRow = Math.floor(index / 10) + 1,
+						newCol = index % 10 + 1;
+					if (newRow === row && newCol === col) {
+						return;
+					}
+					row = newRow;
+					col = newCol;
+					selected.css('width', (col * 10) + '%').css('height', (row * 10) + '%');
+					nums.html(col+' X '+row)
+				}
+			}).bind('click', function() {
+				if (!row || !col) {
+					return;
+				}
+				self.hideMenu();
+				html = '<table style="width:100%;" cellpadding="2" cellspacing="0" border="1">';
+				for (i = 0; i < row; i++) {
+					html += '<tr>';
+					for (var j = 0; j < col; j++) {
+						html += '<td>' + (K.IE ? '&nbsp;' : '<br />') + '</td>';
+					}
+					html += '</tr>';
+				}
+				html += '</table>';
+				if (!K.IE) {
+					html += '<br />';
+				}
+				self.insertHtml(html);
+				self.addBookmark();
+			});
+			more.bind('click', function() {
+				self.hideMenu();
+				self.plugin.table.prop();
+			})
+			menu = self.createMenu({
+				name : name,
+				addClass: 'ke-menu-clear',
+				beforeRemove : function() {
+					table.unbind();
+					more.unbind();
+				}
+			});
+			menu.div.append(wrapperDiv);
+		},
+
 		//insert or modify table
 		prop : function(isInsert) {
-			var html = [
-				'<div style="padding:20px;">',
-				//rows, cols
-				'<div class="ke-dialog-row">',
-				'<label for="keRows" style="width:90px;">' + lang.cells + '</label>',
-				lang.rows + ' <input type="text" id="keRows" class="ke-input-text ke-input-number" name="rows" value="" maxlength="4" /> &nbsp; ',
-				lang.cols + ' <input type="text" class="ke-input-text ke-input-number" name="cols" value="" maxlength="4" />',
-				'</div>',
-				//width, height
-				'<div class="ke-dialog-row">',
-				'<label for="keWidth" style="width:90px;">' + lang.size + '</label>',
-				lang.width + ' <input type="text" id="keWidth" class="ke-input-text ke-input-number" name="width" value="" maxlength="4" /> &nbsp; ',
-				'<select name="widthType">',
-				'<option value="%">' + lang.percent + '</option>',
-				'<option value="px">' + lang.px + '</option>',
-				'</select> &nbsp; ',
-				lang.height + ' <input type="text" class="ke-input-text ke-input-number" name="height" value="" maxlength="4" /> &nbsp; ',
-				'<select name="heightType">',
-				'<option value="%">' + lang.percent + '</option>',
-				'<option value="px">' + lang.px + '</option>',
-				'</select>',
-				'</div>',
-				//space, padding
-				'<div class="ke-dialog-row">',
-				'<label for="kePadding" style="width:90px;">' + lang.space + '</label>',
-				lang.padding + ' <input type="text" id="kePadding" class="ke-input-text ke-input-number" name="padding" value="" maxlength="4" /> &nbsp; ',
-				lang.spacing + ' <input type="text" class="ke-input-text ke-input-number" name="spacing" value="" maxlength="4" />',
-				'</div>',
-				//align
-				'<div class="ke-dialog-row">',
-				'<label for="keAlign" style="width:90px;">' + lang.align + '</label>',
-				'<select id="keAlign" name="align">',
-				'<option value="">' + lang.alignDefault + '</option>',
-				'<option value="left">' + lang.alignLeft + '</option>',
-				'<option value="center">' + lang.alignCenter + '</option>',
-				'<option value="right">' + lang.alignRight + '</option>',
-				'</select>',
-				'</div>',
-				//border
-				'<div class="ke-dialog-row">',
-				'<label for="keBorder" style="width:90px;">' + lang.border + '</label>',
-				lang.borderWidth + ' <input type="text" id="keBorder" class="ke-input-text ke-input-number" name="border" value="" maxlength="4" /> &nbsp; ',
-				lang.borderColor + ' <span class="ke-inline-block ke-input-color"></span>',
-				'</div>',
-				//background color
-				'<div class="ke-dialog-row">',
-				'<label for="keBgColor" style="width:90px;">' + lang.backgroundColor + '</label>',
-				'<span class="ke-inline-block ke-input-color"></span>',
-				'</div>',
-				'</div>'
-			].join('');
+			var html = 
+			`<div style="padding:20px;">
+				<div class="ke-dialog-row">
+					<label for="keRows">${lang.rows}</label>
+					<input type="text" id="keRows" name="rows" maxlength="4" style="width:96px;"/>
+					<label for="keCols" style="margin-left:40px">${lang.cols}</label>
+					<input type="text" id="keCols" name="cols" maxlength="4" style="width:96px;"/>
+				</div>
+				<div class="ke-dialog-row">
+					<label for="keWidth">${lang.width}</label>
+					<input type="text" id="keWidth" class="ke-input-number" name="width" maxlength="4" />
+					<select name="widthType" style="border-left:0">
+						<option value="%">${lang.percent}</option>
+						<option value="px">${lang.px}</option>
+					</select>
+					<label for="keHeight" style="margin-left:40px">${lang.height}</label>
+					<input id="keHeight" type="text" class="ke-input-number" name="height" maxlength="4" />
+					<select name="heightType" style="border-left:0">
+						<option value="%">${lang.percent}</option>
+						<option value="px">${lang.px}</option>
+					</select>
+				</div>
+				<div class="ke-dialog-row">
+					<label for="kePadding">${lang.padding}</label>
+					<input type="text" id="kePadding" name="padding" maxlength="4" style="width:96px;"/>
+					<label for="keSpacing" style="margin-left:40px">${lang.spacing}</label>
+					<input type="text" id="keSpacing" name="spacing" maxlength="4" style="width:96px;" />
+				</div>
+				<div class="ke-dialog-row">
+					<label for="keBorderWidth">${lang.borderWidth}</label>
+					<input type="text" id="keBorderWidth" name="border" maxlength="4" style="width:96px;"/>
+					<label style="margin-left:40px">${lang.borderColor}</label>
+					<span class="ke-inline-block ke-input-color" style="width:101px;"></span>
+				</div>
+				<div class="ke-dialog-row">
+					<label>${lang.align}</label>
+					<select name="align" style="width:106px;">
+						<option value="">${lang.alignDefault}</option>
+						<option value="left">${lang.alignLeft}</option>
+						<option value="center">${lang.alignCenter}</option>
+						<option value="right">${lang.alignRight}</option>
+					</select>
+					<label style="margin-left:40px">${lang.backgroundColor}</label>
+					<span class="ke-inline-block ke-input-color" style="width:101px;"></span>
+				</div>
+			</div>`;
 			var bookmark = self.cmd.range.createBookmark();
 			var dialog = self.createDialog({
 				name : name,
-				width : 500,
+				width : 470,
 				title : self.lang(name),
 				body : html,
 				beforeRemove : function() {
@@ -299,7 +361,7 @@ KindEditor.plugin('table', function(K) {
 			colorBox = K('.ke-input-color', div);
 			_initColorPicker(div, colorBox.eq(0));
 			_initColorPicker(div, colorBox.eq(1));
-			_setColor(colorBox.eq(0), '#000000');
+			_setColor(colorBox.eq(0), '');
 			_setColor(colorBox.eq(1), '');
 			// foucs and select
 			rowsBox[0].focus();
@@ -338,59 +400,66 @@ KindEditor.plugin('table', function(K) {
 				widthBox[0].select();
 			}
 		},
-		//modify cell
-		cellprop : function() {
-			var html = [
-				'<div style="padding:20px;">',
-				//width, height
-				'<div class="ke-dialog-row">',
-				'<label for="keWidth" style="width:90px;">' + lang.size + '</label>',
-				lang.width + ' <input type="text" id="keWidth" class="ke-input-text ke-input-number" name="width" value="" maxlength="4" /> &nbsp; ',
-				'<select name="widthType">',
-				'<option value="%">' + lang.percent + '</option>',
-				'<option value="px">' + lang.px + '</option>',
-				'</select> &nbsp; ',
-				lang.height + ' <input type="text" class="ke-input-text ke-input-number" name="height" value="" maxlength="4" /> &nbsp; ',
-				'<select name="heightType">',
-				'<option value="%">' + lang.percent + '</option>',
-				'<option value="px">' + lang.px + '</option>',
-				'</select>',
-				'</div>',
-				//align
-				'<div class="ke-dialog-row">',
-				'<label for="keAlign" style="width:90px;">' + lang.align + '</label>',
-				lang.textAlign + ' <select id="keAlign" name="textAlign">',
-				'<option value="">' + lang.alignDefault + '</option>',
-				'<option value="left">' + lang.alignLeft + '</option>',
-				'<option value="center">' + lang.alignCenter + '</option>',
-				'<option value="right">' + lang.alignRight + '</option>',
-				'</select> ',
-				lang.verticalAlign + ' <select name="verticalAlign">',
-				'<option value="">' + lang.alignDefault + '</option>',
-				'<option value="top">' + lang.alignTop + '</option>',
-				'<option value="middle">' + lang.alignMiddle + '</option>',
-				'<option value="bottom">' + lang.alignBottom + '</option>',
-				'<option value="baseline">' + lang.alignBaseline + '</option>',
-				'</select>',
-				'</div>',
-				//border
-				'<div class="ke-dialog-row">',
-				'<label for="keBorder" style="width:90px;">' + lang.border + '</label>',
-				lang.borderWidth + ' <input type="text" id="keBorder" class="ke-input-text ke-input-number" name="border" value="" maxlength="4" /> &nbsp; ',
-				lang.borderColor + ' <span class="ke-inline-block ke-input-color"></span>',
-				'</div>',
-				//background color
-				'<div class="ke-dialog-row">',
-				'<label for="keBgColor" style="width:90px;">' + lang.backgroundColor + '</label>',
-				'<span class="ke-inline-block ke-input-color"></span>',
-				'</div>',
-				'</div>'
-			].join('');
+		modifyProp: function(cell) {
+			var html = 
+			`<div style="padding:20px;">
+			${
+				cell ?
+				`<div class="ke-dialog-row">
+					<label for="keWidth">${lang.width}</label>
+					<input type="text" id="keWidth" class="ke-input-number" name="width" maxlength="4" />
+					<select name="widthType" style="border-left:0">
+						<option value="%">${lang.percent}</option>
+						<option value="px">${lang.px}</option>
+					</select>
+					<label for="keHeight" style="margin-left:40px">${lang.height}</label>
+					<input type="text" id="keHeight" class="ke-input-number" name="height" maxlength="4" />
+					<select name="heightType" style="border-left:0">
+						<option value="%">${lang.percent}</option>
+						<option value="px">${lang.px}</option>
+					</select>
+				</div>` :
+				`<div class="ke-dialog-row">
+					<label for="keHeight">${lang.height}</label>
+					<input type="text" id="keHeight" class="ke-input-number" name="height" maxlength="4" style="width:101px"/>
+				</div>`
+			}
+				<div class="ke-dialog-row">
+					<label for="keAlign">${lang.textAlign}</label>
+					<select id="keAlign" name="textAlign" style="width:106px">
+						<option value="">${lang.alignDefault}</option>
+						<option value="left">${lang.alignLeft}</option>
+						<option value="center">${lang.alignCenter}</option>
+						<option value="right">${lang.alignRight}</option>
+					</select>
+					<label for="verticalAlign" style="margin-left:40px">${lang.verticalAlign}</label>
+					<select name="verticalAlign" style="width:106px">
+						<option value="">${lang.alignDefault}</option>
+						<option value="top">${lang.alignTop}</option>
+						<option value="middle">${lang.alignMiddle}</option>
+						<option value="bottom">${lang.alignBottom}</option>
+						<option value="baseline">${lang.alignBaseline}</option>
+					</select>
+				</div>
+				<div class="ke-dialog-row">
+					<label>${lang.borderColor}</label>
+					<span class="ke-inline-block ke-input-color" style="width:101px"></span>
+					<label style="margin-left:40px">${lang.backgroundColor}</label>
+					<span class="ke-inline-block ke-input-color" style="width:101px"></span>
+				</div>
+			${
+				cell ?
+				`<div class="ke-dialog-row">
+					<label for="keBorder">${lang.borderWidth}</label>
+					<input type="text" id="keBorder" class="ke-input-number" name="border" maxlength="4" style="width:96px"/>
+				</div>` : ''
+			}	
+			</div>`;
 			var bookmark = self.cmd.range.createBookmark();
 			var dialog = self.createDialog({
 				name : name,
-				width : 500,
-				title : self.lang('tablecell'),
+				width : 470,
+				title : self.lang(cell ? 'tablecell' : 'tablerowprop'),
 				body : html,
 				beforeRemove : function() {
 					colorBox.unbind();
@@ -398,42 +467,44 @@ KindEditor.plugin('table', function(K) {
 				yesBtn : {
 					name : self.lang('yes'),
 					click : function(e) {
-						var width = widthBox.val(),
-							height = heightBox.val(),
-							widthType = widthTypeBox.val(),
-							heightType = heightTypeBox.val(),
-							padding = paddingBox.val(),
-							spacing = spacingBox.val(),
+						var height = heightBox.val(),
 							textAlign = textAlignBox.val(),
 							verticalAlign = verticalAlignBox.val(),
-							border = borderBox.val(),
 							borderColor = K(colorBox[0]).html() || '',
 							bgColor = K(colorBox[1]).html() || '';
-						if (!/^\d*$/.test(width)) {
-							alert(self.lang('invalidWidth'));
-							widthBox[0].focus();
-							return;
+						if (cell) {
+							var width = widthBox.val(),
+								widthType = widthTypeBox.val(),
+								heightType = heightTypeBox.val(),
+								border = borderBox.val();
+							if (!/^\d*$/.test(width)) {
+								alert(self.lang('invalidWidth'));
+								widthBox[0].focus();
+								return;
+							}
 						}
 						if (!/^\d*$/.test(height)) {
 							alert(self.lang('invalidHeight'));
 							heightBox[0].focus();
 							return;
 						}
-						if (!/^\d*$/.test(border)) {
+						if (cell && !/^\d*$/.test(border)) {
 							alert(self.lang('invalidBorder'));
 							borderBox[0].focus();
 							return;
 						}
-						cell.css({
-							width : width !== '' ? (width + widthType) : '',
-							height : height !== '' ? (height + heightType) : '',
-							'background-color' : bgColor,
-							'text-align' : textAlign,
-							'vertical-align' : verticalAlign,
-							'border-width' : border,
-							'border-style' : border !== '' ? 'solid' : '',
-							'border-color' : borderColor
-						});
+						var css = {
+							height: height ? height + (cell ? heightType : 'px') : '',
+							'text-align': textAlign,
+							'vertical-align': verticalAlign,
+							'background-color': bgColor,
+							'border-color': borderColor
+						};
+						if (cell) {
+							css.width = width ? width + widthType : '';
+							css['border-width'] = border;
+						}
+						section.css(css);
 						self.hideDialog().focus();
 						self.cmd.range.moveToBookmark(bookmark);
 						self.cmd.select();
@@ -442,54 +513,214 @@ KindEditor.plugin('table', function(K) {
 				}
 			}),
 			div = dialog.div,
-			widthBox = K('[name="width"]', div).val(100),
 			heightBox = K('[name="height"]', div),
-			widthTypeBox = K('[name="widthType"]', div),
-			heightTypeBox = K('[name="heightType"]', div),
-			paddingBox = K('[name="padding"]', div).val(2),
-			spacingBox = K('[name="spacing"]', div).val(0),
 			textAlignBox = K('[name="textAlign"]', div),
 			verticalAlignBox = K('[name="verticalAlign"]', div),
-			borderBox = K('[name="border"]', div).val(1),
-			colorBox = K('.ke-input-color', div);
+			colorBox = K('.ke-input-color', div),
+
+			heightTypeBox = cell ? K('[name="heightType"]', div) : null,
+			widthBox = cell ? K('[name="width"]', div) : null,
+			widthTypeBox = cell ? K('[name="widthType"]', div) : null,
+			borderBox = cell ? K('[name="border"]', div) : null;
+
+			// get selected
+			var section = cell ? self.plugin.getSelectedCell() : self.plugin.getSelectedRow(),
+				secelm = section[0],
+				style = secelm.style;
 			_initColorPicker(div, colorBox.eq(0));
 			_initColorPicker(div, colorBox.eq(1));
-			_setColor(colorBox.eq(0), '#000000');
-			_setColor(colorBox.eq(1), '');
-			// foucs and select
-			widthBox[0].focus();
-			widthBox[0].select();
-			// get selected cell
-			var cell = self.plugin.getSelectedCell();
-			var match,
-				cellWidth = cell[0].style.width || cell[0].width || '',
-				cellHeight = cell[0].style.height || cell[0].height || '';
-			if ((match = /^(\d+)((?:px|%)*)$/.exec(cellWidth))) {
-				widthBox.val(match[1]);
-				widthTypeBox.val(match[2]);
-			} else {
-				widthBox.val('');
-			}
+			_setColor(colorBox.eq(0), K.toHex(style.borderColor || ''));
+			_setColor(colorBox.eq(1), K.toHex(style.backgroundColor || ''));
+
+			// set value
+			textAlignBox.val(style.textAlign || secelm.align || '');
+			verticalAlignBox.val(style.verticalAlign || secelm.valign || '');
+
+			var match, cellHeight = style.height || secelm.height || '';
 			if ((match = /^(\d+)((?:px|%)*)$/.exec(cellHeight))) {
 				heightBox.val(match[1]);
-				heightTypeBox.val(match[2]);
+				if (cell) {
+					heightTypeBox.val(match[2]);
+				}
 			}
-			textAlignBox.val(cell[0].style.textAlign || '');
-			verticalAlignBox.val(cell[0].style.verticalAlign || '');
-			var border = cell[0].style.borderWidth || '';
-			if (border) {
-				border = parseInt(border);
+			if (cell) {
+				var cellWidth = style.width || secelm.width || '';
+				if ((match = /^(\d+)((?:px|%)*)$/.exec(cellWidth))) {
+					widthBox.val(match[1]);
+					widthTypeBox.val(match[2]);
+				}
+				var border = style.borderWidth || '';
+				if (border) {
+					border = parseInt(border);
+				}
+				borderBox.val(border);
+				widthBox[0].focus();
+				widthBox[0].select();
+			} else {
+				heightBox[0].focus();
+				heightBox[0].select();
 			}
-			borderBox.val(border);
-			_setColor(colorBox.eq(0), K.toHex(cell[0].style.borderColor || ''));
-			_setColor(colorBox.eq(1), K.toHex(cell[0].style.backgroundColor || ''));
-			widthBox[0].focus();
-			widthBox[0].select();
 		},
+		rowprop: function() {
+			this.modifyProp();
+		},
+		cellprop : function() {
+			this.modifyProp(true);
+		},
+
+
+
+		//modify cell
+		// cellprop : function() {
+		// 	var html = 
+		// 	`<div style="padding:20px;">
+		// 		<div class="ke-dialog-row">
+		// 			<label for="keWidth">${lang.width}</label>
+		// 			<input type="text" id="keWidth" class="ke-input-number" name="width" maxlength="4" />
+		// 			<select name="widthType" style="border-left:0">
+		// 				<option value="%">${lang.percent}</option>
+		// 				<option value="px">${lang.px}</option>
+		// 			</select>
+		// 			<label for="keHeight" style="margin-left:40px">${lang.height}</label>
+		// 			<input type="text" id="keHeight" class="ke-input-number" name="height" maxlength="4" />
+		// 			<select name="heightType" style="border-left:0">
+		// 				<option value="%">${lang.percent}</option>
+		// 				<option value="px">${lang.px}</option>
+		// 			</select>
+		// 		</div>
+		// 		<div class="ke-dialog-row">
+		// 			<label for="keAlign">${lang.textAlign}</label>
+		// 			<select id="keAlign" name="textAlign" style="width:106px">
+		// 				<option value="">${lang.alignDefault}</option>
+		// 				<option value="left">${lang.alignLeft}</option>
+		// 				<option value="center">${lang.alignCenter}</option>
+		// 				<option value="right">${lang.alignRight}</option>
+		// 			</select>
+		// 			<label for="verticalAlign" style="margin-left:40px">${lang.verticalAlign}</label>
+		// 			<select name="verticalAlign" style="width:106px">
+		// 				<option value="">${lang.alignDefault}</option>
+		// 				<option value="top">${lang.alignTop}</option>
+		// 				<option value="middle">${lang.alignMiddle}</option>
+		// 				<option value="bottom">${lang.alignBottom}</option>
+		// 				<option value="baseline">${lang.alignBaseline}</option>
+		// 			</select>
+		// 		</div>
+		// 		<div class="ke-dialog-row">
+		// 			<label for="keBorder">${lang.borderWidth}</label>
+		// 			<input type="text" id="keBorder" class="ke-input-number" name="border" maxlength="4" style="width:96px"/>
+		// 			<label style="margin-left:40px">${lang.borderColor}</label>
+		// 			<span class="ke-inline-block ke-input-color" style="width:101px"></span>
+		// 		</div>
+		// 		<div class="ke-dialog-row">
+		// 			<label>${lang.backgroundColor}</label>
+		// 			<span class="ke-inline-block ke-input-color" style="width:101px"></span>
+		// 		</div>
+		// 	</div>`;
+		// 	var bookmark = self.cmd.range.createBookmark();
+		// 	var dialog = self.createDialog({
+		// 		name : name,
+		// 		width : 470,
+		// 		title : self.lang('tablecell'),
+		// 		body : html,
+		// 		beforeRemove : function() {
+		// 			colorBox.unbind();
+		// 		},
+		// 		yesBtn : {
+		// 			name : self.lang('yes'),
+		// 			click : function(e) {
+		// 				var width = widthBox.val(),
+		// 					height = heightBox.val(),
+		// 					widthType = widthTypeBox.val(),
+		// 					heightType = heightTypeBox.val(),
+		// 					padding = paddingBox.val(),
+		// 					spacing = spacingBox.val(),
+		// 					textAlign = textAlignBox.val(),
+		// 					verticalAlign = verticalAlignBox.val(),
+		// 					border = borderBox.val(),
+		// 					borderColor = K(colorBox[0]).html() || '',
+		// 					bgColor = K(colorBox[1]).html() || '';
+		// 				if (!/^\d*$/.test(width)) {
+		// 					alert(self.lang('invalidWidth'));
+		// 					widthBox[0].focus();
+		// 					return;
+		// 				}
+		// 				if (!/^\d*$/.test(height)) {
+		// 					alert(self.lang('invalidHeight'));
+		// 					heightBox[0].focus();
+		// 					return;
+		// 				}
+		// 				if (!/^\d*$/.test(border)) {
+		// 					alert(self.lang('invalidBorder'));
+		// 					borderBox[0].focus();
+		// 					return;
+		// 				}
+		// 				cell.css({
+		// 					width : width !== '' ? (width + widthType) : '',
+		// 					height : height !== '' ? (height + heightType) : '',
+		// 					'background-color' : bgColor,
+		// 					'text-align' : textAlign,
+		// 					'vertical-align' : verticalAlign,
+		// 					'border-width' : border,
+		// 					'border-style' : border !== '' ? 'solid' : '',
+		// 					'border-color' : borderColor
+		// 				});
+		// 				self.hideDialog().focus();
+		// 				self.cmd.range.moveToBookmark(bookmark);
+		// 				self.cmd.select();
+		// 				self.addBookmark();
+		// 			}
+		// 		}
+		// 	}),
+		// 	div = dialog.div,
+		// 	widthBox = K('[name="width"]', div).val(100),
+		// 	heightBox = K('[name="height"]', div),
+		// 	widthTypeBox = K('[name="widthType"]', div),
+		// 	heightTypeBox = K('[name="heightType"]', div),
+		// 	paddingBox = K('[name="padding"]', div).val(2),
+		// 	spacingBox = K('[name="spacing"]', div).val(0),
+		// 	textAlignBox = K('[name="textAlign"]', div),
+		// 	verticalAlignBox = K('[name="verticalAlign"]', div),
+		// 	borderBox = K('[name="border"]', div).val(1),
+		// 	colorBox = K('.ke-input-color', div);
+		// 	_initColorPicker(div, colorBox.eq(0));
+		// 	_initColorPicker(div, colorBox.eq(1));
+		// 	_setColor(colorBox.eq(0), '');
+		// 	_setColor(colorBox.eq(1), '');
+		// 	// foucs and select
+		// 	widthBox[0].focus();
+		// 	widthBox[0].select();
+		// 	// get selected cell
+		// 	var cell = self.plugin.getSelectedCell();
+		// 	var match,
+		// 		cellWidth = cell[0].style.width || cell[0].width || '',
+		// 		cellHeight = cell[0].style.height || cell[0].height || '';
+		// 	if ((match = /^(\d+)((?:px|%)*)$/.exec(cellWidth))) {
+		// 		widthBox.val(match[1]);
+		// 		widthTypeBox.val(match[2]);
+		// 	} else {
+		// 		widthBox.val('');
+		// 	}
+		// 	if ((match = /^(\d+)((?:px|%)*)$/.exec(cellHeight))) {
+		// 		heightBox.val(match[1]);
+		// 		heightTypeBox.val(match[2]);
+		// 	}
+		// 	textAlignBox.val(cell[0].style.textAlign || '');
+		// 	verticalAlignBox.val(cell[0].style.verticalAlign || '');
+		// 	var border = cell[0].style.borderWidth || '';
+		// 	if (border) {
+		// 		border = parseInt(border);
+		// 	}
+		// 	borderBox.val(border);
+		// 	_setColor(colorBox.eq(0), K.toHex(cell[0].style.borderColor || ''));
+		// 	_setColor(colorBox.eq(1), K.toHex(cell[0].style.backgroundColor || ''));
+		// 	widthBox[0].focus();
+		// 	widthBox[0].select();
+		// },
+
 		insert : function() {
 			this.prop(true);
 		},
-		'delete' : function() {
+		remove: function() {
 			var table = self.plugin.getSelectedTable();
 			self.cmd.range.setStartBefore(table[0]).collapse(true);
 			self.cmd.select();
@@ -708,5 +939,5 @@ KindEditor.plugin('table', function(K) {
 			self.addBookmark();
 		}
 	};
-	self.clickToolbar(name, self.plugin.table.prop);
+	self.clickToolbar(name, self.plugin.table.quick);
 });
