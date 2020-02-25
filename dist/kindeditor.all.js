@@ -7147,15 +7147,13 @@ function openFileDialog(self, K, name, fileUrl, fileTitle, allowUpload, options)
         (function (name) {
             KindEditor.plugin(name, function (K) {
                 var self = this, allowUpload = K.undef(self[configNames[name]], true);
-                if (!_file_uploadJson) {
-                    _file_useForm = K.undef(self.forceIframeTransport, false) || window.FormData === undefined$1;
-                    _file_uploadJson = K.undef(self.uploadJson, self.basePath + 'php/upload_json.php');
-                    _file_name = K.undef(self.filePostName, 'imgFile');
-                    _file_params = K.undef(self.extraFileUploadParams, null);
-                    _file_formatUrl = K.undef(self.formatUploadUrl, true);
-                    _file_fillDescAfter = K.undef(self.fillDescAfterUploadImage, true);
-                    _file_allowManager = K.undef(self.allowFileManager, false);
-                }
+                _file_useForm = K.undef(self.forceIframeTransport, false) || window.FormData === undefined$1;
+                _file_uploadJson = K.undef(self.uploadJson, self.basePath + 'php/upload_json.php');
+                _file_name = K.undef(self.filePostName, 'imgFile');
+                _file_params = K.undef(self.extraFileUploadParams, null);
+                _file_formatUrl = K.undef(self.formatUploadUrl, true);
+                _file_fillDescAfter = K.undef(self.fillDescAfterUploadImage, true);
+                _file_allowManager = K.undef(self.allowFileManager, false);
                 var editFn = function () {
                     openFileDialog(self, K, name, 'http://', '', allowUpload, {});
                 };
