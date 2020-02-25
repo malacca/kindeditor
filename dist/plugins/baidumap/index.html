@@ -11,17 +11,17 @@
 		.iw_poi_title {color:#CC5522;font-size:14px;font-weight:bold;overflow:hidden;padding-right:13px;white-space:nowrap}
 		.iw_poi_content {font:12px arial,sans-serif;overflow:visible;padding-top:4px;white-space:-moz-pre-wrap;word-wrap:break-word}
 	</style>
-	<script type="text/javascript" src="http://api.map.baidu.com/api?key=&v=1.1&services=true"></script>
+	<script type="text/javascript" src="//api.map.baidu.com/api?key=&v=1.1&services=true"></script>
 	<script type="text/javascript">
-		function getParam(name) {
-			return location.href.match(new RegExp('[?&]' + name + '=([^?&]+)', 'i')) ? decodeURIComponent(RegExp.$1) : '';
+		function getParam(name, def) {
+			return location.href.match(new RegExp('[?&]' + name + '=([^?&]+)', 'i')) ? decodeURIComponent(RegExp.$1) : def;
 		}
-		var centerParam = getParam('center');
-		var zoomParam = getParam('zoom');
-		var widthParam = getParam('width');
-		var heightParam = getParam('height');
-		var markersParam = getParam('markers');
-		var markerStylesParam = getParam('markerStyles');
+		var centerParam = getParam('center', '121.473704,31.230393');
+		var zoomParam = getParam('zoom', 11);
+		var widthParam = getParam('width', 560);
+		var heightParam = getParam('height', 360);
+		var markersParam = getParam('markers', '121.473704,31.230393');
+		var markersInfo = getParam('info', '');
 	
 		//创建和初始化地图函数：
 		function initMap(){
@@ -41,6 +41,16 @@
 			var markersArr = markersParam.split(',');
 			var point = new BMap.Point(markersArr[0], markersArr[1]);
 			var marker = new BMap.Marker(point);
+			if (markersInfo) {
+				marker.addEventListener("click", function(){   
+					var opts = {    
+						width : 250,     // 信息窗口宽度    
+						height: 100,     // 信息窗口高度    
+					}    
+					var infoWindow = new BMap.InfoWindow(markersInfo, opts);  // 创建信息窗口对象    
+					map.openInfoWindow(infoWindow, point);      // 打开信息窗口 
+				});
+			}
 			map.addOverlay(marker); // 将标注添加到地图中
 		}
 	

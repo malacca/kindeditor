@@ -23,12 +23,13 @@ KindEditor.plugin('baidumap', function(K) {
             <head>
                 <meta charset="utf-8" /><title></title>
                 <style>html,body {width:100%;height:100%;margin:0;padding:0;background:#FFF }</style>
-				<link rel="stylesheet" type="text/css" href="http://api.map.baidu.com/res/13/bmap.css"/>
-                <script type="text/javascript" src="http://api.map.baidu.com/getscript?v=1.3&ak=&services=&t=20200103072755"></script>
+				<link rel="stylesheet" type="text/css" href="//api.map.baidu.com/res/13/bmap.css"/>
+                <script type="text/javascript" src="//api.map.baidu.com/getscript?v=1.3&ak=&services=&t=20200103072755"></script>
 				<script>var map,geocoder;function initialize(){map=new BMap.Map("map_canvas");var a=new BMap.Point(121.473704,31.230393);map.centerAndZoom(a,11),map.addControl(new BMap.NavigationControl),map.enableScrollWheelZoom(),(new BMap.Geocoder).getLocation(a,function(a){var e=[a.addressComponents.city].join("");parent.document.getElementById("kindeditor_plugin_map_address").value=e})}function search(a){map&&new BMap.LocalSearch(map,{renderOptions:{map:map,autoViewport:!0,selectFirstResult:!1}}).search(a)}</script>
             </head>
             <body onload="initialize();">
-                <div id="map_canvas" style="width:100%; height:100%"></div>
+				<div id="map_canvas" style="width:100%; height:100%"></div>
+				<img src="//api.map.baidu.com/images/marker_red.png" style="position:fixed;top:50%;left:50%;margin-left:-13px;margin-top:-25px;"/>
             </body>
         </html>`;
 	}
@@ -64,13 +65,14 @@ KindEditor.plugin('baidumap', function(K) {
 					var centerObj = map.getCenter();
 					var center = centerObj.lng + ',' + centerObj.lat;
 					var zoom = map.getZoom();
-					var url = [checkbox[0].checked ? mapHtml : 'http://api.map.baidu.com/staticimage',
-						'?center=' + encodeURIComponent(center),
+					var url = [checkbox[0].checked ? mapHtml : '//api.map.baidu.com/staticimage',
+						'?copyright=1',
+						'&center=' + encodeURIComponent(center),
 						'&zoom=' + encodeURIComponent(zoom),
 						'&width=' + mapWidth,
 						'&height=' + mapHeight,
 						'&markers=' + encodeURIComponent(center),
-						'&markerStyles=' + encodeURIComponent('l,A')].join('');
+						'&markerStyles=' + encodeURIComponent('l')].join('');
 					if (checkbox[0].checked) {
 						self.insertHtml('<iframe src="' + url + '" frameborder="0" style="width:' + (mapWidth + 2) + 'px;height:' + (mapHeight + 2) + 'px;"></iframe>');
 					} else {
