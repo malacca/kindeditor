@@ -14,8 +14,7 @@ KindEditor.plugin('baidumap', function(K) {
 		name = 'baidumap', 
 		lang = self.lang(name + '.'),
 		mapWidth = K.undef(self.mapWidth, 558),
-		mapHeight = K.undef(self.mapHeight, 360),
-		mapHtml = K.undef(self.mapHtml, self.pluginsPath + 'baidumap/index.html');
+		mapHeight = K.undef(self.mapHeight, 360);
 
 	// 将 map.html 转移到 js 中, 减少一个 html 文件部署
     function getMapHtml() {
@@ -35,6 +34,7 @@ KindEditor.plugin('baidumap', function(K) {
 	}
 	
 	self.clickToolbar(name, function() {
+		var mapHtml = K.undef(self.mapHtml, self.pluginsPath + 'baidumap/index.html');
 		var html = 
 		`<div style="padding:10px 20px;">
 			<div class="ke-header">
