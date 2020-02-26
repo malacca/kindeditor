@@ -18,6 +18,7 @@ KindEditor.lang({
 	plainpaste : '貼為純文字格式',
 	wordpaste : '自Word貼上',
 	selectall : '全選(Ctrl+A)',
+	justify : '对齐方式', // 新增
 	justifyleft : '靠左對齊',
 	justifycenter : '置中',
 	justifyright : '靠右對齊',

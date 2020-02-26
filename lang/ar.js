@@ -19,6 +19,7 @@ KindEditor.lang({
 	plainpaste : 'لصق كنص عادي',
 	wordpaste : 'لصق من مايكروسفت ورد',
 	selectall : 'تحديد الكل',
+	justify : 'justify', // 新增
 	justifyleft : 'محاذاه لليسار',
 	justifycenter : 'محاذاه للوسط',
 	justifyright : 'محاذاه لليمين',

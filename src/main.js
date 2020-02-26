@@ -1438,6 +1438,25 @@ _plugin('core', function(K) {
 			self.focus().exec(name, null);
 		});
 	});
+	// 新增，合并 justify 的菜单，让工具栏更紧凑
+	self.clickToolbar('justify', function() {
+		var menu = self.createMenu({
+				name : 'justify',
+				width : 150
+			});
+		_each(['justifyleft','justifycenter','justifyright','justifyfull'], function(index, key) {
+			menu.addItem({
+				title : self.lang(key),
+				iconClass: 'ke-icon-' + key,
+                checked: self.cmd.state(key),
+				click : function() {
+					self.focus().exec(key, null);
+                    self.hideMenu();
+				}
+			});
+		});
+		menu.autoLeft();
+	});
 	// paste
 	self.afterCreate(function() {
 		var doc = self.edit.doc, cmd, bookmark, div,

@@ -18,6 +18,7 @@ KindEditor.lang({
 	plainpaste : '일반 텍스트로 붙여넣기',
 	wordpaste : '워드 문서로 붙여넣기',
 	selectall : '전체 선택',
+	justify : 'justify', // 新增
 	justifyleft : '왼쪽 정렬',
 	justifycenter : '가운데 정렬',
 	justifyright : '오른쪽 정렬',

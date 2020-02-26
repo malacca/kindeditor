@@ -455,6 +455,9 @@
 .ke-menu-item-center-on {
 	border-left:1px solid #c2cdda;
 }
+.ke-menu-item-checked {
+	opacity: .5;
+}
 
 /* 颜色选择器 */
 .ke-colorpicker {
@@ -987,6 +990,9 @@
 .ke-icon-selectall {
 	background-position: 0px -128px;
 }
+.ke-icon-justify{
+	background-position: 0px -1263px;
+}
 .ke-icon-justifyleft {
 	background-position: 0px -144px;
 }
@@ -998,6 +1004,9 @@
 }
 .ke-icon-justifyfull {
 	background-position: 0px -192px;
+}
+.ke-icon-insertolist {
+	background-position: 0px -1279px;
 }
 .ke-icon-insertorderedlist {
 	background-position: 0px -208px;

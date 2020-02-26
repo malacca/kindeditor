@@ -18,6 +18,7 @@ KindEditor.lang({
 	plainpaste : 'Paste as plain text',
 	wordpaste : 'Paste from Word',
 	selectall : 'Select all',
+	justify : 'justify', // 新增
 	justifyleft : 'Align left',
 	justifycenter : 'Align center',
 	justifyright : 'Align right',

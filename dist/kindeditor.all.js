@@ -4122,11 +4122,13 @@ _extend(KMenu, KWidget, {
             itemDiv.append(centerDiv);
         }
         itemDiv.append(rightDiv);
-        if (item.checked) {
-            iconClass = 'ke-icon-checked';
-        }
         if (iconClass !== '') {
             leftDiv.html('<span class="ke-inline-block ke-toolbar-icon ke-toolbar-icon-url ' + iconClass + '"></span>');
+            if (item.checked) {
+                itemDiv.addClass('ke-menu-item-checked');
+            }
+        } else if (item.checked) {
+            iconClass = 'ke-icon-checked';
         }
         rightDiv.html(item.title);
         return self;
@@ -5921,6 +5923,29 @@ _plugin('core', function (K) {
             self.focus().exec(name, null);
         });
     });
+    self.clickToolbar('justify', function () {
+        var menu = self.createMenu({
+            name: 'justify',
+            width: 150
+        });
+        _each([
+            'justifyleft',
+            'justifycenter',
+            'justifyright',
+            'justifyfull'
+        ], function (index, key) {
+            menu.addItem({
+                title: self.lang(key),
+                iconClass: 'ke-icon-' + key,
+                checked: self.cmd.state(key),
+                click: function () {
+                    self.focus().exec(key, null);
+                    self.hideMenu();
+                }
+            });
+        });
+        menu.autoLeft();
+    });
     self.afterCreate(function () {
         var doc = self.edit.doc, cmd, bookmark, div, cls = '__kindeditor_paste__', pasting = false;
         function movePastedData() {
@@ -6113,6 +6138,7 @@ KindEditor.lang({
     plainpaste: '粘贴为无格式文本',
     wordpaste: '从Word粘贴',
     selectall: '全选(Ctrl+A)',
+    justify: '对齐方式',
     justifyleft: '左对齐',
     justifycenter: '居中',
     justifyright: '右对齐',
