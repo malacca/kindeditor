@@ -37,7 +37,7 @@ K.options = {
 	indentChar : '\t', // \t, "  "
 	cssPath : '', //String or Array
 	cssData : '',
-	minWidth : 650,
+	minWidth : 200,
 	minHeight : 100,
 	minChangeSize : 50,
 	zIndex : 811213,

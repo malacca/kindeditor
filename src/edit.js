@@ -11,9 +11,9 @@ if ((html = document.getElementsByTagName('html'))) {
 
 function _getDefaultEditorStyle(full) {
 	return `<style>
-		html{margin:0;padding:0;${full ? 'background:#F8F8F8' : ''}}
+		html{margin:0;${full ? 'padding:0 15px;background:#F8F8F8' : 'padding:0;'}}
 		body{background:#fff;margin:0;padding:20px}
-		body.full{margin:15px auto;width:800px;padding:30px;box-shadow:0 0 3px 2px rgba(0, 0, 0, 0.08)}
+		body.full{margin:15px auto;max-width:800px;padding:30px;box-shadow:0 0 3px 2px rgba(0, 0, 0, 0.08)}
 		body,td{font:1em/1.5 "sans serif",tahoma,verdana,helvetica;}
 		body, p, div{word-wrap: break-word;}
 		noscript {display:none;}
