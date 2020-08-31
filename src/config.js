@@ -1,13 +1,23 @@
 
 function _getBasePath() {
-	var els = document.getElementsByTagName('script'), src;
-	for (var i = 0, len = els.length; i < len; i++) {
-		src = els[i].src || '';
-		if (src && /kindeditor[\w\-\.]*\.js/.test(src)) {
-			return src.substring(0, src.lastIndexOf('/') + 1);
+	var elm, src;
+	if (currentScript) {
+		elm = currentScript
+	} else {
+		var i, els = document.getElementsByTagName('script');
+		for (i = 0, len = els.length; i < len; i++) {
+			src = els[i].src || '';
+			if (src && /kindeditor[\w\-\.]*\.js/.test(src)) {
+				elm = els[i];
+				break;
+			}
+		}
+		if (!elm) {
+			elm = els[els.length - 1];
 		}
 	}
-	return '';
+	src = elm ? elm.src : null;
+	return src ? src.substring(0, src.lastIndexOf('/') + 1) : '';
 }
 
 K.basePath = _getBasePath();

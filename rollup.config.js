@@ -61,8 +61,13 @@ function mergerFiles(files, dst) {
 	//version
 	const pkg = require('./package.json');
 	code = code.replace(/\$\{VERSION\}/g, '4.1.12('+pkg.version+')');
-    code += 'export default KindEditor;';
     fs.writeFileSync(dst, code);
+}
+function banner(){
+	return fs.readFileSync('src/header.js', {encoding: "utf-8"});
+}
+function footer(){
+	return fs.readFileSync('src/footer.js', {encoding: "utf-8"});
 }
 
 function removeDir(src) {
@@ -129,7 +134,7 @@ const R = {
 	buble: buble({
 		objectAssign: 'Object.assign',
 	}),
-	terser: terser()
+	terser: terser(),
 }
 
 // lang
@@ -163,13 +168,14 @@ fs.readdirSync(distPlugins).forEach(plugin => {
 const output = {
     strict: false,
     compact: true,
-    format: 'umd',
-    name: 'KindEditor',
+	banner,
+	footer,
+    format: 'cjs',
 };
 
 // kindeditor.js
 const coreFile = dist + '/kindeditor.js';
-const coreMiniFile = dist + '/kindeditor.mini.js';
+const coreMiniFile = dist + '/kindeditor.min.js';
 mergerFiles(SRC_FILES, coreFile);
 config.push({
 	plugins: [R.optimize, R.buble],
@@ -177,7 +183,7 @@ config.push({
     output: [
         {...output, file: coreFile},
         {...output, file: coreMiniFile, plugins: [R.terser]},
-    ]
+    ],
 });
 
 // kindeditor.all.js
@@ -186,7 +192,7 @@ PLUGINS.forEach(p => {
 	defaultPlugins.push('plugins/' + p + '/' + p + '.js')
 });
 const allFile = dist + '/kindeditor.all.js';
-const allMiniFile = dist + '/kindeditor.all.mini.js';
+const allMiniFile = dist + '/kindeditor.all.min.js';
 mergerFiles(SRC_FILES.concat('lang/' + LANG + '.js').concat(defaultPlugins), allFile);
 config.push({
 	plugins: [R.optimize, R.buble],

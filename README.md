@@ -14,6 +14,9 @@ http://kindeditor.org/
 * composite (https://github.com/composite) : Korean Translation
 
 -------------------------------------------------------------------------
+## 在线预览
+
+[GitHub Pages](https://malacca.github.io/kindeditor/)  -  [Gitee Pages](http://malaccas.gitee.io/kindeditor)
 
 ## 功能修改
 
@@ -48,7 +51,7 @@ http://kindeditor.org/
 
 ## 参数变更
 
-相对于 http://kindeditor.net/docs/option.html
+相对于 http://kindeditor.net/docs/option.html （[备用文档](blob/master/docs/option.rst)）
 
 **新增**
 

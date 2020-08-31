@@ -8,8 +8,10 @@
 * @version ${VERSION}
 *******************************************************************************/
 
-(function (window, undefined) {
-
-	if (window.KindEditor) {
-		return;
-	}
+(function(g,n,f){
+	typeof exports==='object'&&typeof module!=='undefined'
+		? module.exports=f(n)
+		: typeof define==='function'&&define.amd
+			? define(function(){return f(n)})
+			: ( g=g||self, !g.KindEditor && (g.KindEditor=f(n)) );
+}(this, document.currentScript, (function(currentScript) {

@@ -1,4 +1,21 @@
-(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?module.exports=f():typeof define==='function'&&define.amd?define(f):(g=g||self,g.KindEditor=f());}(this,(function(){var undefined$1;
+/*******************************************************************************
+* KindEditor - WYSIWYG HTML Editor for Internet
+* Copyright (C) 2006-${THISYEAR} kindsoft.net
+*
+* @author Roddy <luolonghao@gmail.com>
+* @website http://www.kindsoft.net/
+* @licence http://www.kindsoft.net/license.php
+* @version ${VERSION}
+*******************************************************************************/
+
+(function(g,n,f){
+	typeof exports==='object'&&typeof module!=='undefined'
+		? module.exports=f(n)
+		: typeof define==='function'&&define.amd
+			? define(function(){return f(n)})
+			: ( g=g||self, !g.KindEditor && (g.KindEditor=f(n)) );
+}(this, document.currentScript, (function(currentScript) {
+var undefined$1;
 var _VERSION = '4.1.12(0.0.1)', _ua = navigator.userAgent.toLowerCase(), _IE = _ua.indexOf('msie') > -1 && _ua.indexOf('opera') == -1, _NEWIE = _ua.indexOf('msie') == -1 && _ua.indexOf('trident') > -1, _GECKO = _ua.indexOf('gecko') > -1 && _ua.indexOf('khtml') == -1, _WEBKIT = _ua.indexOf('applewebkit') > -1, _OPERA = _ua.indexOf('opera') > -1, _MOBILE = _ua.indexOf('mobile') > -1, _IOS = /ipad|iphone|ipod/.test(_ua), _QUIRKS = document.compatMode != 'CSS1Compat', _IERANGE = !window.getSelection, _matches = /(?:msie|firefox|webkit|opera)[\/:\s](\d+)/.exec(_ua), _V = _matches ? _matches[1] : '0', _TIME = new Date().getTime(), _EPNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 function _isArray(val) {
     if (!val) {
@@ -178,14 +195,24 @@ var K = {
 };
 var _INLINE_TAG_MAP = _toMap('a,abbr,acronym,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,img,input,ins,kbd,label,map,q,s,samp,select,small,span,strike,strong,sub,sup,textarea,tt,u,var'), _BLOCK_TAG_MAP = _toMap('address,applet,blockquote,body,center,dd,dir,div,dl,dt,fieldset,form,frameset,h1,h2,h3,h4,h5,h6,head,hr,html,iframe,ins,isindex,li,map,menu,meta,noframes,noscript,object,ol,p,pre,script,style,table,tbody,td,tfoot,th,thead,title,tr,ul'), _SINGLE_TAG_MAP = _toMap('area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed'), _STYLE_TAG_MAP = _toMap('b,basefont,big,del,em,font,i,s,small,span,strike,strong,sub,sup,u'), _CONTROL_TAG_MAP = _toMap('img,table,input,textarea,button'), _PRE_TAG_MAP = _toMap('pre,style,script'), _NOSPLIT_TAG_MAP = _toMap('html,head,body,td,tr,table,ol,ul,li'), _AUTOCLOSE_TAG_MAP = _toMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr'), _FILL_ATTR_MAP = _toMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected'), _VALUE_TAG_MAP = _toMap('input,button,textarea,select');
 function _getBasePath() {
-    var els = document.getElementsByTagName('script'), src;
-    for (var i = 0, len = els.length; i < len; i++) {
-        src = els[i].src || '';
-        if (src && /kindeditor[\w\-\.]*\.js/.test(src)) {
-            return src.substring(0, src.lastIndexOf('/') + 1);
+    var elm, src;
+    if (currentScript) {
+        elm = currentScript;
+    } else {
+        var i, els = document.getElementsByTagName('script');
+        for (i = 0, len = els.length; i < len; i++) {
+            src = els[i].src || '';
+            if (src && /kindeditor[\w\-\.]*\.js/.test(src)) {
+                elm = els[i];
+                break;
+            }
+        }
+        if (!elm) {
+            elm = els[els.length - 1];
         }
     }
-    return '';
+    src = elm ? elm.src : null;
+    return src ? src.substring(0, src.lastIndexOf('/') + 1) : '';
 }
 K.basePath = _getBasePath();
 K.options = {
@@ -6126,4 +6153,6 @@ _plugin('core', function (K) {
             return _addClassToTag(full, 'ke-zeroborder');
         });
     });
-});return KindEditor;})));
+});
+
+return KindEditor;})));

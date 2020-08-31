@@ -5,7 +5,7 @@
   "main": "dist/kindeditor.mini.js",
   "scripts": {
     "server": "node ./server.js",
-    "make": "rollup -c"
+    "build": "rollup -c"
   },
   "license": "MIT",
   "dependencies": {},
